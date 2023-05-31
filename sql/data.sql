@@ -48,7 +48,6 @@ ALTER SEQUENCE musiques_id_seq RESTART;
 INSERT INTO musiques (titre,duree ,date_parution,src, image,id_album) VALUES
 ('Spaceqhip','00:02:58','2023-04-04','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.mp3','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.png', 1);
 
-
 -- --- Populate musique_dans_playlists table ------------
 INSERT INTO musique_dans_playlists (id_playlist,id_musique) VALUES
 (1,1),

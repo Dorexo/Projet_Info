@@ -14,7 +14,7 @@
         <div class="row">
             <div class="col"></div>
             <div class="col">
-                <form action="" method="post">
+                <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
                     <div class="form-outline mb-4 row">
                         <div class="col">
                             <h2 class="text-center">Connexion</h2>
@@ -37,7 +37,7 @@
                             <button type="submit" class="btn btn-primary btn-block mb-4">Se connecter</button>
                         </div>
                         <div class="col">
-                            <a class="btn btn-primary btn-block mb-4" href="inscription.html">S'inscrire</a>
+                            <a class="btn btn-primary btn-block mb-4" href="inscription.php">S'inscrire</a>
                         </div>
                     </div>
                 </form>
