@@ -54,11 +54,13 @@
                     </div>
                     <div class="form-outline mb-4 row text-center">
                         <div class="col">
-                            <button type="submit" class="btn btn-primary btn-block mb-4">S'incrire</button>
+                            <button type="submit" class="btn btn-primary btn-block mb-4">S'inscrire'</button>
                         </div>
+                    </div>
+                    <div class="form-outline mb-4 row">
                         <div class="col">
-                            <a class="btn btn-primary btn-block mb-4" href="connexion.php">Se connecter</a>
-                        </div>                    
+                            Si vous avez un compte : <a href="connexion.php">Se connecter</a>
+                        </div>
                     </div>
                 </form>
             </div>
