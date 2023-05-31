@@ -1,14 +1,13 @@
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS playlists CASCADE;
-DROP TABLE IF EXISTS musique_dans_playlists CASCADE;
-DROP TABLE IF EXISTS musiques CASCADE;
-DROP TABLE IF EXISTS styles CASCADE;
-DROP TABLE IF EXISTS albums CASCADE;
-DROP TABLE IF EXISTS artistes CASCADE;
 DROP TABLE IF EXISTS types CASCADE;
+DROP TABLE IF EXISTS artistes CASCADE;
+DROP TABLE IF EXISTS albums CASCADE;
+DROP TABLE IF EXISTS musiques CASCADE;
+DROP TABLE IF EXISTS musique_dans_playlists CASCADE;
+DROP TABLE IF EXISTS styles CASCADE;
 
 -- Table: users
-
 
 CREATE TABLE users(
         id SERIAL PRIMARY KEY,
@@ -29,9 +28,6 @@ CREATE TABLE playlists(
 
         ,CONSTRAINT playlists_users_FK FOREIGN KEY (id_user) REFERENCES users(id)
 );
-
-
-
 
 -- Table: types
 
@@ -85,8 +81,6 @@ CREATE TABLE musiques(
         ,CONSTRAINT musiques_styles_FK FOREIGN KEY (id_style) REFERENCES styles(id)
         ,CONSTRAINT musiques_albums_FK FOREIGN KEY (id_album) REFERENCES albums(id)
 );
-
-
 
 -- Table: musique_dans_playlists
 
