@@ -14,7 +14,7 @@ CREATE TABLE users(
         nom      Varchar (50) NOT NULL ,
         prenom   Varchar (50) NOT NULL ,
         date_naissance    DATE NOT NULL,
-        e_mail   Varchar (50) NOT NULL ,
+        email   Varchar (50) NOT NULL ,
         mdp      Varchar (150) NOT NULL
 );
 
