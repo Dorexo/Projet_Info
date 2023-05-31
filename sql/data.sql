@@ -1,11 +1,11 @@
-DELETE FROM users;
-DELETE FROM playlists;
 DELETE FROM musique_dans_playlists;
 DELETE FROM musiques;
-DELETE FROM styles;
 DELETE FROM albums;
+DELETE FROM styles;
 DELETE FROM artistes;
 DELETE FROM types;
+DELETE FROM playlists;
+DELETE FROM users;
 
 -- --- Populate users table ------------
 ALTER SEQUENCE users_id_seq RESTART;
@@ -29,12 +29,7 @@ INSERT INTO types (type_artiste) VALUES
 -- --- Populate artistes table ------------
 ALTER SEQUENCE artistes_id_seq RESTART;
 INSERT INTO artistes (nom, image, id_type) VALUES
-('Squeezie', '../ressources/images/squeezie.png', 1);
-
--- --- Populate albums table ------------
-ALTER SEQUENCE albums_id_seq RESTART;
-INSERT INTO albums (nom, date_parution, image,id_artiste) VALUES
-('Treis Degete','2023-02-02','../ressources/images/squeezie.png', 1);
+('Squeezie', '../ressources/Squeezie/squeezie.png', 1);
 
 -- --- Populate styles table ------------
 ALTER SEQUENCE styles_id_seq RESTART;
@@ -43,10 +38,15 @@ INSERT INTO styles (style_musique) VALUES
 ('Pop'),
 ('Electro');
 
+-- --- Populate albums table ------------
+ALTER SEQUENCE albums_id_seq RESTART;
+INSERT INTO albums (nom, date_parution, image,id_artiste,id_style) VALUES
+('Treis Degete','2023-02-02','../ressources/Squeezie/Treis Degete/treis degete.png', 1,3);
+
 -- --- Populate musiques table ------------
 ALTER SEQUENCE musiques_id_seq RESTART;
-INSERT INTO musiques (titre,duree ,date_parution,src, image,id_style,id_album) VALUES
-('Spaceqhip','00:02:58','2023-04-04','../ressources/audios/spaceship.mp3','../ressources/images/spaceship.png', 3,1);
+INSERT INTO musiques (titre,duree ,date_parution,src, image,id_album) VALUES
+('Spaceqhip','00:02:58','2023-04-04','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.mp3','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.png', 1);
 
 
 -- --- Populate musique_dans_playlists table ------------

@@ -3,9 +3,9 @@ DROP TABLE IF EXISTS playlists CASCADE;
 DROP TABLE IF EXISTS types CASCADE;
 DROP TABLE IF EXISTS artistes CASCADE;
 DROP TABLE IF EXISTS albums CASCADE;
+DROP TABLE IF EXISTS styles CASCADE;
 DROP TABLE IF EXISTS musiques CASCADE;
 DROP TABLE IF EXISTS musique_dans_playlists CASCADE;
-DROP TABLE IF EXISTS styles CASCADE;
 
 -- Table: users
 
@@ -47,6 +47,13 @@ CREATE TABLE artistes(
         ,CONSTRAINT artistes_types_FK FOREIGN KEY (id_type) REFERENCES types(id)
 );
 
+-- Table: styles
+
+CREATE TABLE styles(
+        id SERIAL PRIMARY KEY,
+        style_musique     Varchar (50) NOT NULL
+);
+
 -- Table: albums
 
 CREATE TABLE albums(
@@ -54,16 +61,11 @@ CREATE TABLE albums(
         nom      Varchar (50) NOT NULL ,
         date_parution     DATE NOT NULL,
         image     Varchar (150) NOT NULL ,
-        id_artiste    Int NOT NULL
+        id_artiste    Int NOT NULL,
+        id_style    Int NOT NULL
 
         ,CONSTRAINT albums_artistes_FK FOREIGN KEY (id_artiste) REFERENCES artistes(id)
-);
-
--- Table: styles
-
-CREATE TABLE styles(
-        id SERIAL PRIMARY KEY,
-        style_musique     Varchar (50) NOT NULL
+        ,CONSTRAINT musiques_styles_FK FOREIGN KEY (id_style) REFERENCES styles(id)
 );
 
 -- Table: musiques
@@ -75,10 +77,8 @@ CREATE TABLE musiques(
         date_parution       DATE NOT NULL,
         src       Varchar (150) NOT NULL ,
         image     Varchar (150) NOT NULL ,
-        id_style    Int NOT NULL,
         id_album    Int NOT NULL
 
-        ,CONSTRAINT musiques_styles_FK FOREIGN KEY (id_style) REFERENCES styles(id)
         ,CONSTRAINT musiques_albums_FK FOREIGN KEY (id_album) REFERENCES albums(id)
 );
 
