@@ -17,6 +17,9 @@ if (!$_SESSION['connected']) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="../js/ajax.js" defer></script>
+    <script src="../js/accueil.js" defer></script>
 </head>
 
 <body>
@@ -51,9 +54,7 @@ if (!$_SESSION['connected']) {
         <div class="col"></div>
         <div class="col">
             <div class="col-sm-4 col-sm-offset-4 embed-responsive embed-responsive-4by3">
-                <audio controls class="embed-responsive-item">
-                    <source src="../ressources/Squeezie/Treis Degete/SpaceShip/Spaceship.mp3">
-                </audio>
+
                 <div class="card">
                     <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
                         <img class="card-img-top" src="https://mdbootstrap.com/wp-content/uploads/2019/02/flam.jpg" alt="Card image cap">
@@ -62,15 +63,13 @@ if (!$_SESSION['connected']) {
                         </a>
                     </div>
                     <div class="card-body text-center">
-                        <audio id="music">
+
+                        <h5 class="h5 font-weight-bold"><a href="#" target="_blank">Dj Flam</a></h5>
+                        <p class="mb-0"><a href="#" target="_blank">Urban Bachata remix</a></p>
+
+                        <audio controls autoplay>
                             <source src="../ressources/Squeezie/Treis Degete/SpaceShip/Spaceship.mp3">
                         </audio>
-                        <div id="audioplayer">
-                            <i id="pButton" class="fas fa-play"></i>
-                            <div id="timeline">
-                                <div id="playhead"></div>
-                            </div>
-                        </div>
 
                     </div>
                 </div>
