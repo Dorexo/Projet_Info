@@ -19,7 +19,7 @@ function inscription(){
     }
 }
 function confirmation(data){
-    console.log(data);
+    document.location.href="connexion.php"; 
 }
 
 function listener(){
