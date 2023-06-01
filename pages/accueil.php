@@ -30,10 +30,10 @@ if (!$_SESSION['connected']) {
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
+                    <li class="nav-item d-flex align-items-center">
                         <a class="nav-link" href="accueil.php"><i class="fa-solid fa-house"></i></a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item d-flex align-items-center">
                         <a class="nav-link" href="recherche.php"><i class="fa-solid fa-magnifying-glass"></i></a>
                     </li>
                     <li class="nav-item">
@@ -44,16 +44,60 @@ if (!$_SESSION['connected']) {
                     </li>
                 </ul>
             </div>
-            <a class="nav-link" href="profil.php">Profil</i></a>
+            <a class="nav-link" href="profil.php">Profil </i><i class="fa-solid fa-user"></i></a>
             </ul>
         </div>
     </nav>
 
-    <div class="row" style="height:15%;"></div>
+    <div class="container">
+    <br>
     <div class="row">
+        <div class="col">
+            <form>
+            <div class="row input-group">
+                <div class="col"></div>
+                <div class="col-4 d-flex justify-content-center">
+                    <div class="form-outline">
+                        <input type="text" placeholder="Recherche" class="form-control" />
+                    </div>
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="col-4 text-center d-flex align-items-center">
+                    <div class="col">
+                        <input class="form-check-input" type="radio" name="parqui" checked>
+                        <label class="form-check-label">Par Morceaux </label>
+                    </div>
+                    <div class="col">
+                        <input class="form-check-input" type="radio" name="parqui">
+                        <label class="form-check-label">Par Albums </label>
+                    </div>
+                    <div class="col">
+                        <input class="form-check-input" type="radio" name="parqui">
+                        <label class="form-check-label">Par Artistes </label>
+                    </div>
+                </div>
+                <div class="col"></div>
+            </div>
+            </form>
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col">
+            <h2>Historique</h2>
+        </div>
         <div class="col"></div>
+        <div class="col">
+            <h2>Playlists</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col border border-dark rounded" style="background-color:rgb(222,222,222);">
+            
+        </div>
         <div class="col d-flex justify-content-center">
-            <div class="card" style="width:50%;">
+            <div class="card" style="width:60%;">
                 <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
                     <img class="card-img-top" src="https://mdbootstrap.com/wp-content/uploads/2019/02/flam.jpg" alt="Card imagecap">
                     <a href="#!">
@@ -61,16 +105,57 @@ if (!$_SESSION['connected']) {
                     </a>
                 </div>
                 <div class="card-body text-center">
-                    <h5><a href="#">Dj Flam</a></h5>
-                    <a href="#">Urban Bachata remix</a>
-                    <audio controls preload="metadata" style="width:100%;">
-                        <source src="../ressources/Squeezie/Treis Degete/SpaceShip/Spaceship.mp3">
-                    </audio>
+                    <div class="row">
+                        <div class="col">
+                            <h5><a href="#">Dj Flam</a></h5>
+                            <p><a href="#">Urban Bachata remix</a></p>
+                            <audio controls preload="metadata" style="width:100%;">
+                                <source src="../ressources/Squeezie/Treis Degete/SpaceShip/Spaceship.mp3">
+                            </audio>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col d-flex justify-content-start">
+                            <button type="button" class="btn btn-outline-danger">
+                                <i class="fa-solid fa-heart" style="color:red;"></i>
+                                <!--
+                                    <i class="fa-regular fa-heart"></i>
+                                -->
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-outline-success">
+                                <i class="fa-solid fa-info"></i>
+                            </button>
+                        </div>
+                        <div class="col d-flex justify-content-end">
+                            <button type="button" class="btn btn-outline-dark">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
-        <div class="col"></div>
-    <div class="row"></div>
+        <div class="col border border-dark rounded" style="background-color:rgb(222,222,222);">
+            
+        </div>
+        <div class="row" style="height:40px;">
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="row ">   
+                    <div class="col"><h2>Favoris</h2></div>     
+                </div>
+                <div class="row border border-dark rounded" style="height:150px;background-color:rgb(222,222,222);">        
+                    
+                </div>
+            </div>
+        </div>
+        <div class="row" style="height:40px;"></div>
+    </div>
 </body>
 
 </html>
