@@ -64,7 +64,7 @@
                                         $_SESSION['nom'] = $user[1];
                                         $_SESSION['prenom'] = $user[2];
                                         $_SESSION['connected'] = true;
-                                        header('Location: accueil.php');
+                                        header('Location: pages/accueil.php');
                                     }
                                 }
                             ?>

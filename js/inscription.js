@@ -18,7 +18,7 @@ function inscription(){
             document.getElementById("errors").classList.remove("d-none");
         }else{
             request = 'nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
-            ajaxRequest('POST','../php/request.php/inscription/',confirmation,request);
+            ajaxRequest('POST','php/request.php/inscription/',confirmation,request);
         }
     }
 }
