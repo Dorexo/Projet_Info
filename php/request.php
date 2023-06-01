@@ -7,9 +7,11 @@
   
     $requestid = substr($_SERVER['PATH_INFO'], 1);
     $requestid = explode('/', $requestid);
+    $requesttype = array_shift($requestid);
 
-    if($requestid[0]=="connexion"){
-        if($_SERVER['REQUEST_METHOD']=="GET"){
+    if($requesttype=="inscription"){
+        if($_SERVER['REQUEST_METHOD']=="POST"){
+            $request = dbInsertNewUser($db,$_POST['nom'],$_POST['prenom'],$_POST['date_naissance'],$_POST['email'],$_POST['mdp']);
         }
     }
 

@@ -35,4 +35,54 @@
         }
     } 
 
+    function AlreadyUser($db,$email){
+        try{
+            $request = 'SELECT * FROM users where email=:email';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':email', $email);    
+            $statement->execute();
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            if(empty($user)){
+                return false;
+            }else{
+                return true;
+            }
+        }catch (PDOException $exception){
+            error_log('Request error: '.$exception->getMessage());
+            return false;
+        }
+    }
+    function dbInsertNewUser($db,$nom,$prenom,$date_naissance,$email,$mdp){
+        try{
+            if(!AlreadyUser($db,$email)){
+                $hash=password_hash($mdp, PASSWORD_DEFAULT);
+                $stmt = $db->prepare("INSERT INTO users (nom, prenom, date_naissance, email, mdp) VALUES (:nom, :prenom, :date_naissance, :email, :mdp)");
+                $stmt->bindParam(':nom', $nom);
+                $stmt->bindParam(':prenom', $prenom);
+                $stmt->bindParam(':date_naissance', $date_naissance);
+                $stmt->bindParam(':email', $email);
+                $stmt->bindParam(':mdp', $hash);
+                $stmt->execute();
+
+                $id = dbGetUser($db,$email,$mdp)[0];
+
+                $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES (:nom, :date_creation, :date_naissance, :id_user)");
+                $stmt->bindParam(':nom', "Favoris");
+                $stmt->bindParam(':prenom', date("d/m/Y",time()));
+                $stmt->bindParam(':id_user', $$id);
+                $stmt->execute();
+                $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES (:nom, :date_creation, :date_naissance, :id_user)");
+                $stmt->bindParam(':nom', "Historique");
+                $stmt->bindParam(':prenom', date("d/m/Y",time()));
+                $stmt->bindParam(':id_user', $$id);
+                $stmt->execute();
+                return "true";
+            }else{
+                return "Already";
+            }
+        }catch (PDOException $exception){
+            error_log('Request error: '.$exception->getMessage());
+            return false;
+        }
+    } 
 ?>
