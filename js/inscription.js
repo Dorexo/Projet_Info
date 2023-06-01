@@ -11,15 +11,25 @@ function inscription(){
     document.getElementById('mdp1').value = "";
     mdp2 = document.getElementById('mdp2').value;
     document.getElementById('mdp2').value = "";
-    if(mdp1!=mdp2 || nom=="" || prenom=="" || date_naissance=="" || email=="" || mdp1==""){
-        console.log("erreur");
-    }else{
-        request = 'nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
-        ajaxRequest('POST','../php/request.php/inscription/',confirmation,request);
+    if(nom!="" && prenom!="" && date_naissance!="" && email!="" && mdp1!=""){
+        if(mdp1!=mdp2){
+            document.getElementById("errors").style.display = "block";
+            document.getElementById("errors").innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> '+'Mot de passe incorrect';
+            document.getElementById("errors").classList.remove("d-none");
+        }else{
+            request = 'nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
+            ajaxRequest('POST','../php/request.php/inscription/',confirmation,request);
+        }
     }
 }
 function confirmation(data){
-    document.location.href="connexion.php"; 
+    if(data=="Already"){
+        document.getElementById("errors").style.display = "block";
+        document.getElementById("errors").innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> '+'Utilisateur déjà existant';
+        document.getElementById("errors").classList.remove("d-none");
+    }else{
+        document.location.href="connexion.php"; 
+    }
 }
 
 function listener(){
