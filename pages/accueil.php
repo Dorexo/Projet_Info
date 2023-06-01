@@ -49,34 +49,28 @@ if (!$_SESSION['connected']) {
         </div>
     </nav>
 
-    <div class="row h-25"></div>
+    <div class="row" style="height:15%;"></div>
     <div class="row">
         <div class="col"></div>
-        <div class="col">
-            <div class="col-sm-4 col-sm-offset-4 embed-responsive embed-responsive-4by3">
-
-                <div class="card">
-                    <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
-                        <img class="card-img-top" src="https://mdbootstrap.com/wp-content/uploads/2019/02/flam.jpg" alt="Card image cap">
-                        <a href="#!">
-                            <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
-                        </a>
-                    </div>
-                    <div class="card-body text-center">
-
-                        <h5 class="h5 font-weight-bold"><a href="#" target="_blank">Dj Flam</a></h5>
-                        <p class="mb-0"><a href="#" target="_blank">Urban Bachata remix</a></p>
-
-                        <audio controls autoplay>
-                            <source src="../ressources/Squeezie/Treis Degete/SpaceShip/Spaceship.mp3">
-                        </audio>
-
-                    </div>
+        <div class="col d-flex justify-content-center">
+            <div class="card" style="width:50%;">
+                <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+                    <img class="card-img-top" src="https://mdbootstrap.com/wp-content/uploads/2019/02/flam.jpg" alt="Card imagecap">
+                    <a href="#!">
+                        <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+                    </a>
+                </div>
+                <div class="card-body text-center">
+                    <h5><a href="#">Dj Flam</a></h5>
+                    <a href="#">Urban Bachata remix</a>
+                    <audio controls preload="metadata" style="width:100%;">
+                        <source src="../ressources/Squeezie/Treis Degete/SpaceShip/Spaceship.mp3">
+                    </audio>
                 </div>
             </div>
-            <div class="col h-25"></div>
         </div>
-        <div class="row"></div>
+        <div class="col"></div>
+    <div class="row"></div>
 </body>
 
 </html>

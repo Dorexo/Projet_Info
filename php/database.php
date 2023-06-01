@@ -25,7 +25,7 @@
             $statement->execute();
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             if(!empty($result) && password_verify($mdp,$result['mdp'])){
-                return array($result['id'],$result['nom'],$result['prenom']);
+                return array($result['id_user'],$result['nom'],$result['prenom']);
             }else{
                 return "error";
             }
