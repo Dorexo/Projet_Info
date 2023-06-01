@@ -14,7 +14,8 @@ function ajaxRequest(type, url, callback, data = null)
         {
         case 200:
             console.log(xhr.responseText);
-            callback(xhr.responseText);
+            let resp = JSON.parse(xhr.responseText);
+            callback(resp);
             break;
         case 201:
         default:
@@ -44,4 +45,4 @@ function httpErrors(errorCode)
             $('#errors').hide();
         }, 5000);
     }
-}   
+}

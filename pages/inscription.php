@@ -54,14 +54,16 @@
                             <input type="password" id="mdp2" class="form-control" />
                         </div>
                     </div>
+                    <section id="errors" class="container alert alert-danger d-none">
+                    </section>
                     <div class="form-outline mb-4 row text-center">
                         <div class="col">
-                            <button type="submit" id="envoyer" class="btn btn-primary btn-block mb-4">S'inscrire'</button>
+                            <button type="submit" id="envoyer" class="btn btn-primary btn-block mb-4">S'inscrire</button>
                         </div>
                     </div>
                     <div class="form-outline mb-4 row">
                         <div class="col">
-                            Si vous avez un compte : <a href="connexion.php">Se connecter</a>
+                            Si vous avez déjà un compte : <a href="connexion.php">Se connecter</a>
                         </div>
                     </div>
                 </form>

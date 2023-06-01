@@ -50,7 +50,7 @@
                                 </div>
                                 <div class="form-outline mb-4 row">
                                     <div class="col">
-                                        Si vous n'avez pas de comptes : <a href="inscription.php">S'inscrire</a>
+                                        Si vous n'avez pas de compte : <a href="inscription.php">S'inscrire</a>
                                     </div>
                                 </div>
                             </form>
