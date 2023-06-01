@@ -65,18 +65,17 @@
                 $stmt->execute();
 
                 $id = dbGetUser($db,$email,$mdp)[0];
+                $date = date("Y-m-d",time());
 
-                $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES (:nom, :date_creation, :date_naissance, :id_user)");
-                $stmt->bindParam(':nom', "Favoris");
-                $stmt->bindParam(':prenom', date("d/m/Y",time()));
-                $stmt->bindParam(':id_user', $$id);
+                $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES ('Favoris', :date_creation, :id_user)");
+                $stmt->bindParam(':date_creation', $date);
+                $stmt->bindParam(':id_user', $id);
                 $stmt->execute();
-                $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES (:nom, :date_creation, :date_naissance, :id_user)");
-                $stmt->bindParam(':nom', "Historique");
-                $stmt->bindParam(':prenom', date("d/m/Y",time()));
-                $stmt->bindParam(':id_user', $$id);
+                $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES ('Historique', :date_creation, :id_user)");
+                $stmt->bindParam(':date_creation', $date);
+                $stmt->bindParam(':id_user', $id);
                 $stmt->execute();
-                return "true";
+                return true;
             }else{
                 return "Already";
             }
