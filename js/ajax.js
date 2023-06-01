@@ -1,17 +1,14 @@
 // Requête ajax
 function ajaxRequest(type, url, callback, data = null)
 {
-    let xhr;
+    let xhr = new XMLHttpRequest();
     console.log(data);
 
-    xhr = new XMLHttpRequest();
     xhr.open(type, url);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-    xhr.onload = () =>
-    {
-        switch (xhr.status)
-        {
+    xhr.onload = () => {
+        switch (xhr.status) {
         case 200:
             console.log(xhr.responseText);
             let resp = JSON.parse(xhr.responseText);
@@ -22,9 +19,9 @@ function ajaxRequest(type, url, callback, data = null)
             displayErrors(xhr.status);
         }
     };
-
     xhr.send(data);
 }
+
 
 // Affiche l'erreur
 function httpErrors(errorCode)

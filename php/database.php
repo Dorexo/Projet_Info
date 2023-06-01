@@ -42,11 +42,7 @@
             $statement->bindParam(':email', $email);    
             $statement->execute();
             $user = $statement->fetch(PDO::FETCH_ASSOC);
-            if(empty($user)){
-                return false;
-            }else{
-                return true;
-            }
+            return (empty($user) ? false : true);
         }catch (PDOException $exception){
             error_log('Request error: '.$exception->getMessage());
             return false;
