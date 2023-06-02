@@ -102,4 +102,39 @@
         }
     }
 
+    function getMusic($db, $id_musique) {
+        try {
+            $request = 'SELECT m.titre, m.duree, m.src, m.image, a.nom as "anom", r.nom as "rnom" FROM musiques m JOIN albums a ON m.id_album=a.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE id_musique = :id_musique';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_musique', $id_musique);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+    function dbInsertInHistorique($db, $id_user, $id_musique){
+
+    }
+    function dbGetHistorique($db, $user_id) {
+        try {
+            $request = 'SELECT m.id_musique, m.titre, m.image, alb.nom as "anom", art.nom as "rnom" FROM musiques m
+            JOIN musique_dans_playlists d ON m.id_musique = d.id_musique
+            JOIN playlists p ON  p.id_playlist = d.id_playlist
+            JOIN users u ON u.id_user = p.id_user
+            JOIN albums alb ON alb.id_album = m.id_album
+            JOIN artistes art ON art.id_artiste = alb.id_artiste
+            WHERE p.nom ='." 'Historique' AND u.id_user = :id";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id', $user_id);    
+            $statement->execute();
+            $histo = $statement->fetchall(PDO::FETCH_ASSOC);
+            return $histo;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
 ?>

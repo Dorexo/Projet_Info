@@ -31,27 +31,32 @@ if (!$_SESSION['connected']) {
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item d-flex align-items-center">
-                        <a class="nav-link" href="accueil.php"><i class="fa-solid fa-house"></i></a>
+                        <a class="nav-link" href="#" onclick="accueil()"><i class="fa-solid fa-house"></i></a>
                     </li>
                     <li class="nav-item d-flex align-items-center">
-                        <a class="nav-link" href="recherche.php"><i class="fa-solid fa-magnifying-glass"></i></a>
+                        <a class="nav-link" href="#" onclick="recherche()"><i class="fa-solid fa-magnifying-glass"></i></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="playlists.php">Playlists</a>
+                        <a class="nav-link" href="#" onclick="playlists()">Playlists</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="favoris.php">Favoris</a>
+                        <a class="nav-link" href="#" onclick="favoris()">Favoris</a>
                     </li>
                 </ul>
             </div>
-            <a class="nav-link" href="profil.php" id="id_user" value=<?php echo $_SESSION['id']; ?>>Profil </i><i class="fa-solid fa-user"></i></a>
+            <a class="nav-link" href="#" onclick="favoris()" id="id_user" value=<?php echo $_SESSION['id']; ?>>Profil </i><i class="fa-solid fa-user"></i></a>
             </ul>
         </div>
     </nav>
 
-    <div class="container" id="page">
+    <div class="container" id="page" style="height:82%;">
 
     </div>
+    <footer class="bg-light d-flex align-items-center" style="height:10%;">
+        <div class="row" id="music" style="width:100%;">
+        
+        </div>
+    </footer>
 </body>
 
 </html>

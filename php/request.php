@@ -14,8 +14,19 @@
             $request = dbInsertNewUser($db,$_POST['nom'],$_POST['prenom'],$_POST['date_naissance'],$_POST['email'],$_POST['mdp']);
         }
     }elseif($requesttype=="accueil"){
+        $requesttype = array_shift($requestid);
+        if($requesttype=="playlists"){
+            if($_SERVER['REQUEST_METHOD']=="GET"){
+                $request = dbGetPlaylists($db,$_GET['id_user']);
+            }
+        }elseif($requesttype=="historique"){
+            if($_SERVER['REQUEST_METHOD']=="GET"){
+                $request = dbGetHistorique($db,$_GET['id_user']);
+            }
+        }
+    }elseif($requesttype=="music"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
-            $request = dbGetPlaylists($db,$_GET['id_user']);
+            $request = getMusic($db,$_GET['id_musique']);
         }
     }
 
