@@ -17,6 +17,8 @@
         }
     }
 
+    //CONNEXION/INSCRIPTIONS
+
     function dbGetUser($db,$email,$mdp){
         try{
             $request = 'SELECT * FROM users where email=:email';
@@ -84,4 +86,20 @@
             return false;
         }
     } 
+
+    // ACCEUIL
+
+    function dbGetPlaylists($db,$id_user){
+        try{
+            $request = "SELECT p.id_playlist, p.nom, m.image FROM playlists p JOIN musique_dans_playlists c ON c.id_playlist=p.id_playlist JOIN musiques m ON m.id_musique=c.id_musique where p.id_user=:id_user and nom!='Favoris' and nom!='Historique' and m.id_musique=(SELECT id_musique FROM musique_dans_playlists l WHERE p.id_playlist=l.id_playlist LIMIT 1)";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);   
+            $statement->execute();
+            return $statement->fetchall(PDO::FETCH_ASSOC);
+        }catch (PDOException $exception){
+            error_log('Request error: '.$exception->getMessage());
+            return false;
+        }
+    }
+
 ?>

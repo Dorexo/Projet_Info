@@ -13,6 +13,10 @@
         if($_SERVER['REQUEST_METHOD']=="POST"){
             $request = dbInsertNewUser($db,$_POST['nom'],$_POST['prenom'],$_POST['date_naissance'],$_POST['email'],$_POST['mdp']);
         }
+    }elseif($requesttype=="accueil"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetPlaylists($db,$_GET['id_user']);
+        }
     }
 
     echo json_encode($request);

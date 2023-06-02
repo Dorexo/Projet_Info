@@ -2,7 +2,7 @@
 // Vérification autorisation
 session_start();
 if (!$_SESSION['connected']) {
-    header('Location: ../connection.php');
+    header('Location: ../connexion.php');
 }
 ?>
 
@@ -19,7 +19,7 @@ if (!$_SESSION['connected']) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <script src="../js/ajax.js" defer></script>
-    <script src="../js/accueil.js" defer></script>
+    <script src="../js/script.js" defer></script>
 </head>
 
 <body>
@@ -44,7 +44,7 @@ if (!$_SESSION['connected']) {
                     </li>
                 </ul>
             </div>
-            <a class="nav-link" href="profil.php">Profil </i><i class="fa-solid fa-user"></i></a>
+            <a class="nav-link" href="profil.php" id="id_user" value=<?php echo $_SESSION['id']; ?>>Profil </i><i class="fa-solid fa-user"></i></a>
             </ul>
         </div>
     </nav>
@@ -92,7 +92,7 @@ if (!$_SESSION['connected']) {
             <h2>Playlists</h2>
         </div>
     </div>
-    <div class="row">
+    <div class="row" style="height:70%">
         <div class="col border border-dark rounded" style="background-color:rgb(222,222,222);">
             
         </div>
@@ -110,11 +110,13 @@ if (!$_SESSION['connected']) {
                             <h5><a href="#">Dj Flam</a></h5>
                             <p><a href="#">Urban Bachata remix</a></p>
                             <audio controls preload="metadata" style="width:100%;">
-                                <source src="../ressources/Squeezie/Treis Degete/SpaceShip/Spaceship.mp3">
+                                <source src="../ressources/Squeezie/Treis Degete/Spaceship/Spaceship.mp3">
                             </audio>
                         </div>
                     </div>
-                    <br>
+                </div>
+                <br>
+                <div class="card-footer text-center">
                     <div class="row">
                         <div class="col d-flex justify-content-start">
                             <button type="button" class="btn btn-outline-danger">
@@ -135,26 +137,24 @@ if (!$_SESSION['connected']) {
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
-        <div class="col border border-dark rounded" style="background-color:rgb(222,222,222);">
-            
-        </div>
-        <div class="row" style="height:40px;">
-        </div>
-        <div class="row">
-            <div class="col">
-                <div class="row ">   
-                    <div class="col"><h2>Favoris</h2></div>     
+        <div class="col border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:100%; height:100%;">
+            <div id="playlists_accueil">
+            <div class="row">
+                <div class="col mt-2">
+                    <button class="btn btn-secondary" id="boutton_favoris" style="width:8em; height:8em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button>
+                    <p>Favoris</p>
                 </div>
-                <div class="row border border-dark rounded" style="height:150px;background-color:rgb(222,222,222);">        
+                <div class="col mt-2" id="playlist_accueil">
                     
                 </div>
             </div>
+            </div>
         </div>
-        <div class="row" style="height:40px;"></div>
+    </div>
+    <div class="row" style="height:4%"></div>
     </div>
 </body>
 

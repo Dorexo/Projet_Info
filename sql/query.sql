@@ -1,1 +1,1 @@
-INSERT INTO playlists (nom, date_creation, id_user) VALUES ('Favoris', '2023-06-01', 1)
+INSERT INTO musique_dans_playlists(id_playlist,id_musique) VALUES(6,1)
