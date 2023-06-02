@@ -46,10 +46,13 @@ INSERT INTO albums (nom, date_parution, image,id_artiste,id_style) VALUES
 -- --- Populate musiques table ------------
 ALTER SEQUENCE musiques_id_musique_seq RESTART;
 INSERT INTO musiques (titre,duree ,date_parution,src, image,id_album) VALUES
-('Spaceqhip','00:02:58','2023-04-04','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.mp3','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.png', 1);
+('TimeTime','00:02:38','2021-11-15','../ressources/Squeezie/Treis Degete/TimeTime/TimeTime.mp3','../ressources/Squeezie/Treis Degete/TimeTime/TimeTime.png', 1),
+('Spaceship','00:02:58','2023-04-04','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.mp3','../ressources/Squeezie/Treis Degete/Spaceship/spaceship.png', 1);
 
 -- --- Populate musique_dans_playlists table ------------
-INSERT INTO musique_dans_playlists (id_playlist,id_musique) VALUES
-(1,1),
-(2,1),
-(3,1);
+INSERT INTO musique_dans_playlists (date_ajout,id_playlist,id_musique) VALUES
+('2023-02-02 16:05:06',1,1),
+('2023-02-05 16:05:06',2,1),
+('2023-02-06 15:05:06',2,2),
+('2023-02-06 17:05:06',2,1),
+('2023-02-06 16:05:06',3,1);

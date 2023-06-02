@@ -26,7 +26,7 @@
         }
     }elseif($requesttype=="music"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
-            $request = getMusic($db,$_GET['id_musique']);
+            $request = ListenMusic($db,$_GET['id_musique'],$_GET['id_user']);
         }
     }
 

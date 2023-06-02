@@ -86,6 +86,7 @@ CREATE TABLE musiques(
 -- Table: musique_dans_playlists
 
 CREATE TABLE musique_dans_playlists(
+        date_ajout         TIMESTAMP NOT NULL,
         id_playlist        Int NOT NULL,
         id_musique         Int NOT NULL
         

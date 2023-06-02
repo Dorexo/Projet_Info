@@ -2,7 +2,7 @@
 function ajaxRequest(type, url, callback, data = null)
 {
     let xhr;
-    console.log(data);
+    //console.log(data);
 
     xhr = new XMLHttpRequest();
     xhr.open(type, url);
