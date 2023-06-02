@@ -184,4 +184,46 @@
             return false;
         }
     }
+
+
+    //Recherche
+    function dbSearchMusiques($db, $search) {
+        try {
+            $request = 'SELECT m.id_musique, m.image, titre, a.nom as "anom", r.nom as "rnom", duree, m.date_parution '."FROM musiques m JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE titre ILIKE CONCAT('%',:search::text, '%') ORDER BY titre";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':search', $search);    
+            $statement->execute();
+            $research = $statement->fetchall(PDO::FETCH_ASSOC);
+            return $research;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbSearchAlbums($db, $search) {
+        try {
+            $request = 'SELECT a.id_album,a.nom as "anom", r.nom as "rnom", a.image, a.date_parution '."FROM albums a JOIN artistes r ON a.id_artiste=r.id_artiste WHERE a.nom ILIKE CONCAT('%',:search::text, '%') ORDER BY a.nom";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':search', $search);    
+            $statement->execute();
+            $research = $statement->fetchall(PDO::FETCH_ASSOC);
+            return $research;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbSearchArtistes($db, $search) {
+        try {
+            $request = "SELECT id_artiste, nom, image FROM artistes WHERE nom ILIKE CONCAT('%',:search::text, '%') ORDER BY nom";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':search', $search);    
+            $statement->execute();
+            $research = $statement->fetchall(PDO::FETCH_ASSOC);
+            return $research;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
 ?>

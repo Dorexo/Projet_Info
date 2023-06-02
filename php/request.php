@@ -24,11 +24,22 @@
                 $request = dbGetHistorique($db,$_GET['id_user']);
             }
         }
+    }elseif($requesttype=="recherche"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            if($_GET['who']=="musique"){
+                $request = dbSearchMusiques($db,$_GET['search']);
+            }elseif($_GET['who']=="album"){
+                $request = dbSearchAlbums($db,$_GET['search']);
+            }elseif($_GET['who']=="artiste"){
+                $request = dbSearchArtistes($db,$_GET['search']);
+            }
+            array_unshift($request,$_GET['who']);
+        }
     }elseif($requesttype=="music"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = ListenMusic($db,$_GET['id_musique'],$_GET['id_user']);
         }
     }
-
+    
     echo json_encode($request);
 ?>

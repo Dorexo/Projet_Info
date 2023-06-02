@@ -110,34 +110,34 @@ function accueil(id=-1){
     <br>
     <div class="row">
         <div class="col">
-            <form>
-            <div class="row input-group" style="height:8%">
-                <div class="col"></div>
-                <div class="col-4 d-flex justify-content-center">
-                    <div class="form-outline">
-                        <input type="text" placeholder="Recherche" class="form-control" id="recherche"/>
-                    </div>
-                    <button type="button" class="btn btn-primary">
-                        <i class="fas fa-search"></i>
-                    </button>
+        <form>
+        <div class="row input-group" style="height:8%">
+            <div class="col"></div>
+            <div class="col-4 d-flex justify-content-center">
+                <div class="form-outline">
+                    <input type="text" placeholder="Recherche" class="form-control" id="recherche"/>
                 </div>
-                <div class="col-4 text-center d-flex align-items-center">
-                    <div class="col">
-                        <input class="form-check-input" type="radio" name="parqui" checked>
-                        <label class="form-check-label">Par Morceaux </label>
-                    </div>
-                    <div class="col">
-                        <input class="form-check-input" type="radio" name="parqui">
-                        <label class="form-check-label">Par Albums </label>
-                    </div>
-                    <div class="col">
-                        <input class="form-check-input" type="radio" name="parqui">
-                        <label class="form-check-label">Par Artistes </label>
-                    </div>
-                </div>
-                <div class="col"></div>
+                <button type="button" class="btn btn-primary" id="recherche_submit">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
-            </form>
+            <div class="col-4 text-center d-flex align-items-center">
+                <div class="col">
+                    <input class="form-check-input" type="radio" name="parqui" value="musique" checked>
+                    <label class="form-check-label">Par Morceaux </label>
+                </div>
+                <div class="col">
+                    <input class="form-check-input" type="radio" name="parqui" value="album">
+                    <label class="form-check-label">Par Albums </label>
+                </div>
+                <div class="col">
+                    <input class="form-check-input" type="radio" name="parqui" value="artiste">
+                    <label class="form-check-label">Par Artistes </label>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+        </form>
         </div>
     </div>
     <br>
@@ -174,11 +174,20 @@ function accueil(id=-1){
     <div class="row" style="height:4%"></div>`;
     getPlaylists();
     getHistorique();
-    document.getElementById("recherche").addEventListener("click", function(event){
+    document.getElementById("recherche_submit").addEventListener("click", function(event){
         event.preventDefault();
-        event.target.
-        recherche(id);
-    });
+        console.log("sssssssssss")
+        search = document.getElementById('recherche').value;
+        document.getElementById('recherche').value = "";
+        radios = document.getElementsByName("parqui");
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].checked) {
+                recherche();
+                ajaxRequest('GET','../php/request.php/recherche?search='+search+'&who='+radios[i].value,printRecherche);
+                break;
+            }
+        }
+    }); 
 }
 
 
@@ -201,15 +210,15 @@ function recherche(){
                 </div>
                 <div class="col-4 text-center d-flex align-items-center">
                     <div class="col">
-                        <input class="form-check-input" type="radio" name="parqui" checked>
+                        <input class="form-check-input" type="radio" name="parqui" value="musique" checked>
                         <label class="form-check-label">Par Morceaux </label>
                     </div>
                     <div class="col">
-                        <input class="form-check-input" type="radio" name="parqui">
+                        <input class="form-check-input" type="radio" name="parqui" value="album">
                         <label class="form-check-label">Par Albums </label>
                     </div>
                     <div class="col">
-                        <input class="form-check-input" type="radio" name="parqui">
+                        <input class="form-check-input" type="radio" name="parqui" value="artiste">
                         <label class="form-check-label">Par Artistes </label>
                     </div>
                 </div>
@@ -222,8 +231,8 @@ function recherche(){
     <div class="row" style="height:78%">
         <div class="col"></div>
         <div class="col-6 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:60%; height:100%;">
-        <div id="recherche">
-            
+        <div id="recherche_page">
+        
         </div>
         </div>
         <div class="col"></div>
@@ -232,12 +241,62 @@ function recherche(){
 
     document.getElementById("recherche_submit").addEventListener("click", function(event){
         event.preventDefault();
-        rech = document.getElementById('recherche').value;
+        search = document.getElementById('recherche').value;
         document.getElementById('recherche').value = "";
-        
-    });
+        radios = document.getElementsByName("parqui");
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].checked) {
+                ajaxRequest('GET','../php/request.php/recherche?search='+search+'&who='+radios[i].value,printRecherche);
+                break;
+            }
+        }
+    }); 
 }
-
+function printRecherche(data){
+    console.log(data[0]);
+    nbresult = data.length
+    liste = document.getElementById("recherche_page");
+    inner ='<table class="table text-center align-middle">';
+    if(data[0]=="musique"){
+        inner = inner + '<thead><tr><th></th><th>Titre</th><th>Album</th><th>Artiste</th><th>Durée</th><th>Date de parution</th><th></th></thead><tbody>'
+        for(i=1;i<nbresult;i++){
+            inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i]['id_musique']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['titre']+'</td><td>'+data[i]['anom']+'</td><td>'+data[i]['rnom']+'</td><td>'+data[i]['duree']+'</td><td>'+data[i]['date_parution']+'</td><td>'+`
+            <div class="col d-flex align-items-center">
+                <div class="row">
+                    <div class="col d-flex justify-content-start">
+                        <button type="button" class="btn btn-outline-danger">
+                            <i class="fa-solid fa-heart" style="color:red;"></i>
+                            <!--
+                                <i class="fa-regular fa-heart"></i>
+                            -->
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-success">
+                            <i class="fa-solid fa-info"></i>
+                        </button>
+                    </div>
+                    <div class="col d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div></td></tr>`
+        }
+    }else if(data[0]=="album"){
+        inner = inner + "<thead><tr><th></th><th>Nom de l'album</th><th>Artiste</th><th>Date de parution</th></thead><tbody>"
+        for(i=1;i<nbresult;i++){
+            inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i]['id_album']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['anom']+'</td><td>'+data[i]['rnom']+'</td><td>'+data[i]['date_parution']+'</td></tr>'
+        }
+    }else if(data[0]=="artiste"){
+        inner = inner + "<thead><tr><th></th><th>Nom de l'artiste</th></thead><tbody>"
+        for(i=1;i<nbresult;i++){
+            inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i]['id_album']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['nom']+'</td></tr>'
+        }
+    }
+    liste.innerHTML= inner + '</tbody></table>';
+}
 
 
 
