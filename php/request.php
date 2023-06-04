@@ -18,6 +18,7 @@
         if($requesttype=="playlists"){
             if($_SERVER['REQUEST_METHOD']=="GET"){
                 $request = dbGetPlaylists($db,$_GET['id_user']);
+                array_unshift($request,dbGetid_favoris($db,$_GET['id_user']));
             }
         }elseif($requesttype=="historique"){
             if($_SERVER['REQUEST_METHOD']=="GET"){
@@ -27,7 +28,7 @@
     }elseif($requesttype=="recherche"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
             if($_GET['who']=="musique"){
-                $request = dbSearchMusiques($db,$_GET['search']);
+                $request = dbSearchMusiques($db,$_GET['search'],$_GET['id_user']);
             }elseif($_GET['who']=="album"){
                 $request = dbSearchAlbums($db,$_GET['search']);
             }elseif($_GET['who']=="artiste"){
@@ -35,9 +36,55 @@
             }
             array_unshift($request,$_GET['who']);
         }
+    }elseif($requesttype=="favoris"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetMusiqueOfPlaylist($db,$_GET['id_playlist'],$_GET['id_user']);
+            array_unshift($request,dbGetNomPlaylist($db,$_GET['id_playlist']));
+        }
     }elseif($requesttype=="music"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = ListenMusic($db,$_GET['id_musique'],$_GET['id_user']);
+        }
+    }elseif($requesttype=="fav"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            if($_GET['what']=="insert"){
+                $request = dbInsertFav($db,$_GET['id_musique'],$_GET['id_user']);
+            }elseif($_GET['what']=="delete"){
+                $request = dbDeleteFav($db,$_GET['id_musique'],$_GET['id_user']);
+            }
+        }
+    }elseif($requesttype=="favfoot"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = [isFavoris($db,$_GET['id_musique'],$_GET['id_user']),$_GET['id_musique']];
+        }
+    }elseif($requesttype=="modal"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = [dbGetTitreMusique($db,$_GET['id_musique']),dbGetPlaylistsWhitoutMusique($db,$_GET['id_musique'],$_GET['id_user'])];
+        }elseif($_SERVER['REQUEST_METHOD']=="POST"){
+            $request = dbInsertMusique($db,$_POST['id_musique'],$_POST['id_playlist']);
+        }elseif($_SERVER['REQUEST_METHOD']=="DELETE"){
+            $request = dbDeleteMusique($db,$_GET['id_musique'],$_GET['id_playlist']);
+        }
+    }elseif($requesttype=="playlists"){
+        if($_SERVER['REQUEST_METHOD']=="POST"){
+            $request = dbInsertPlaylist($db,$_POST['nom_playlist'],$_POST['id_user']);
+        }elseif($_SERVER['REQUEST_METHOD']=="DELETE"){
+            $request = dbDeletePlaylist($db,$_GET['id_playlist']);
+        }
+    }elseif($requesttype=="profil"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetInfoProfil($db,$_GET['id_user']);
+        }elseif($_SERVER['REQUEST_METHOD']=="PUT"){
+            parse_str(file_get_contents('php://input'), $_PUT);
+            $request = dbModifProfil($db,$_PUT['id_user'],$_PUT['nom'],$_PUT['prenom'],$_PUT['email'],$_PUT['date_naissance'],$_PUT['mdp']);
+        }
+    }elseif($requesttype=="detailM"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetDetailMusique($db,$_GET['id_musique']);
+        }
+    }elseif($requesttype=="detailAl"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = [dbGetDetailAlbum($db,$_GET['id_album']),dbGetMusiqueOfAlbum($db,$_GET['id_album'])];
         }
     }
     

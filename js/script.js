@@ -1,47 +1,155 @@
 const page = document.getElementById('page');
 const id_user = document.getElementById("id_user").getAttribute("value");
+var id_playlist_library;
+var id_musique_modal;
+var inaccueil;
+var inlibrary;
+var inrecherche;
 
+// Check Favoris
+function checkFav(classe,callback){
+    for (i = 0; i < classe.length; i++) {
+        classe[i].addEventListener("click", function(event){
+            icon = event.currentTarget.children[0];
+            if(icon.getAttribute("id")=="true"){
+                ajaxRequest('GET','../php/request.php/fav?id_musique='+icon.getAttribute("value")+'&what=delete&id_user='+id_user,callback);
+            }else{
+                ajaxRequest('GET','../php/request.php/fav?id_musique='+icon.getAttribute("value")+'&what=insert&id_user='+id_user,callback);
+            }           
+        });
+    }
+}
+function refreshfoot(){
+    icon = document.getElementById("foot").children[0];
+    if(inrecherche){
+        getRecherche();
+    }else if(inlibrary){
+        library(id_playlist_library);
+    }
+    ajaxRequest('GET','../php/request.php/favfoot?id_musique='+icon.getAttribute("value")+'&id_user='+id_user,refreshfavfoot);
+}
+function refreshrecherche(){
+    getRecherche();
+    refreshfoot();
+}
+function refreshlibrary(){
+    library(id_playlist_library);
+    refreshfoot();
+}
+function refreshfavfoot(data){
+    bouton = document.getElementById("foot");
+    if(data[0]==true){
+        inner = '<i class="fa-solid fa-heart" name="coeur" id="true" value="'+data[1]+'"></i>';
+    }else{
+        inner = '<i class="fa-regular fa-heart" name="coeur" id="false" value="'+data[1]+'"></i>';
+    }
+    bouton.innerHTML = inner;
+}
 
+// Check+
+function checkPlus(classeadd){
+    for (i = 0; i < classeadd.length; i++) {
+        classeadd[i].addEventListener("click", function(event){
+            id_musique_modal = event.currentTarget.getAttribute('value');
+            getPlaylistsAndMusique();
+        });
+    }
+}
+function getPlaylistsAndMusique(){
+    ajaxRequest('GET','../php/request.php/modal?id_musique='+id_musique_modal+'&id_user='+id_user,printModal);
+}
+function printModal(data){
+    modalTitle = document.getElementById('modaltitle');
+    modalTitle.innerHTML = '<span value="'+data[0]['id_musique']+'" id="id_musique_modal">Ajouter '+data[0]['titre']+' à :</span>';  
+    modalText = document.getElementById('modalbody');
+    nbpl = data[1].length;
+    inner = '';
+    if(nbpl>0){
+        inner = inner + `<div class="form-outline mb-4">
+        <label class="form-label">Playlists</label>
+            <select class="form-control form-select" id="id_playlist_modal">`;
+        for(i=0;i<nbpl;i++){
+            inner = inner + '<option value="'+data[1][i]['id_playlist']+'">'+data[1][i]['nom']+'</option>';
+        }
+        inner = inner + `
+            </select>
+        </div>`;
+
+    }
+    modalText.innerHTML = inner;
+}
+function refreshModal(data){
+    getPlaylistsAndMusique();
+    if(inlibrary){
+        refreshfoot();
+    }else if(inaccueil){
+        getPlaylists();
+    }
+}
+
+// CheckDetail
+function CheckDetail(classD){
+    for (i = 0; i < classD.length; i++) {
+        classD[i].addEventListener("click", function(event){
+            id_musique_detail = event.currentTarget.getAttribute('value');
+            getDetailMusique(id_musique_detail);
+        });
+    }
+}
+
+// Footer
 function getMusique(id_musique=1){
     ajaxRequest('GET','../php/request.php/music?id_musique='+id_musique+'&id_user='+id_user,printMusique);
 }
 function printMusique(data){
-    document.getElementById("music").innerHTML = `
+    inner = `
         <div class="col"></div>
         <div class="col-4 d-flex justify-content-center">
             <audio controls style="width:100%;">
-                <source src="`+data['src']+`">
+                <source src="`+data[1]['src']+`">
             </audio>
         </div>
-        <div class="col">
-            <b>`+data['titre']+`</b> par `+data['rnom']+`<br>
-            <b>`+data['anom']+`</b>
+        <div class="col" >
+            <b>`+data[1]['titre']+`</b> par `+data[1]['rnom']+`<br>
+            <b>`+data[1]['anom']+`</b>
         </div>
         <div class="col d-flex align-items-center">
             <div class="row">
             <div class="col d-flex justify-content-start">
-                <button type="button" class="btn btn-outline-danger">
-                    <i class="fa-solid fa-heart" style="color:red;"></i>
-                    <!--
-                        <i class="fa-regular fa-heart"></i>
-                    -->
+                <button type="button" class="btn btn-outline-danger favfoot" id="foot">`;
+    if(data[0]==true){
+        inner = inner + '<i class="fa-solid fa-heart" id="true" value="'+data[1]['id_musique']+'"></i>';
+    }else{
+        inner = inner + '<i class="fa-regular fa-heart" id="false" value="'+data[1]['id_musique']+'"></i>';
+    }
+    inner = inner +`
                 </button>
             </div>
             <div class="col">
-                <button type="button" class="btn btn-outline-success">
+                <button type="button" class="btn btn-outline-success detailf" value="`+data[1]['id_musique']+`">
                     <i class="fa-solid fa-info"></i>
                 </button>
             </div>
             <div class="col d-flex justify-content-end">
-                <button type="button" class="btn btn-outline-dark">
+                <button type="button" class="btn btn-outline-dark modalclass" data-bs-toggle="modal" data-bs-target="#myModal" value="`+data[1]['id_musique']+`">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
             </div>
-        </div> `
-    getHistorique();
+        </div> `;   
+    document.getElementById("music").innerHTML = inner;
+    if(inaccueil){
+        getHistorique();
+    }
+    buttons = document.getElementsByClassName('modalclass');
+    checkPlus(buttons);
+    classe = document.getElementsByClassName("favfoot");
+    checkFav(classe,refreshfoot);
+    classD = document.getElementsByClassName("detailf");
+    CheckDetail(classD);
 }
 
+// Accueil
 function getHistorique(){
     ajaxRequest('GET','../php/request.php/accueil/historique?id_user='+id_user,printHistorique);
 }
@@ -50,11 +158,11 @@ function printHistorique(data){
     liste = document.getElementById("historique_accueil");
     inner =""
     for(i=0;i<nbhisto;i+=2){
-        inner = inner + '<div class="row"><div class="col mt-2"><button class="btn btn-secondary musique" value="'+data[i]['id_musique']+'" style="width:10em; height:10em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button><p>'+data[i]['titre']+'</p></div>'
+        inner = inner + '<div class="row"><div class="col mt-3"><button class="btn btn-secondary musique" value="'+data[i]['id_musique']+'" style="width:70%; height:70%;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button><b><p>'+data[i]['titre']+'</b><br><i>'+data[i]['anom']+'</i><br>'+data[i]['rnom']+'</p></div>'
         if(i+1<nbhisto){
-            inner = inner + '<div class="col mt-2"><button class="btn btn-secondary musique" value="'+data[i+1]['id_musique']+'" style="width:10em; height:10em;"><img class="img-fluid rounded" src="'+data[i+1]['image']+'" ></button><p>'+data[i+1]['titre']+'</p></div></div>'
+            inner = inner + '<div class="col mt-3"><button class="btn btn-secondary musique" value="'+data[i+1]['id_musique']+'" style="width:70%; height:70%;"><img class="img-fluid rounded" src="'+data[i+1]['image']+'" ></button><p><b>'+data[i+1]['titre']+'</b><br><i>'+data[i+1]['anom']+'</i><br>'+data[i+1]['rnom']+'</p></div></div>'
         }else{
-            inner = inner + '<div class="col mt-2"></div></div>'
+            inner = inner + '<div class="col mt-3"></div></div>'
         }
         liste.innerHTML= inner;
     }
@@ -67,42 +175,38 @@ function printHistorique(data){
         });
     }
 }
-
 function getPlaylists(){
     ajaxRequest('GET','../php/request.php/accueil/playlists?id_user='+id_user,printPlaylists);
 }
 function printPlaylists(data){
     nbplaylist = data.length
     if(nbplaylist>0){
-        document.getElementById("playlist_accueil").innerHTML = '<button class="btn btn-secondary playlist" value="'+data[0]['id_playlist']+'" style="width:10em; height:10em;"><img class="img-fluid rounded" src="'+data[0]['image']+'" ></button><p>'+data[0]['nom']+'</p>';
-        nbplaylist--;
         liste = document.getElementById("playlists_accueil");
-        inner = liste.innerHTML;
-        for(i=1;i<nbplaylist+1;i+=2){
-            inner = inner + '<div class="row"><div class="col mt-2"><button class="btn btn-secondary playlist" value="'+data[i]['id_playlist']+'" style="width:10em; height:10em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button><p>'+data[i]['nom']+'</p></div>'
+        inner = '<div class="row"><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[0]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button><p><b>Favoris</b></p></div><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[1]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="'+data[1]['image']+'" ></button><p><b>'+data[1]['nom']+'</b></p></div></div>';
+        nbplaylist--;
+        for(i=2;i<nbplaylist+1;i+=2){
+            inner = inner + '<div class="row"><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[i]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button><p><b>'+data[i]['nom']+'</b></p></div>'
             if(i+1<nbplaylist+1){
-                inner = inner + '<div class="col mt-2"><button class="btn btn-secondary playlist" value="'+data[i+1]['id_playlist']+'" style="width:10em; height:10em;"><img class="img-fluid rounded" src="'+data[i+1]['image']+'" ></button><p>'+data[i+1]['nom']+'</p></div></div>'
+                inner = inner + '<div class="col mt-3"><button class="btn btn-secondary play" value="'+data[i+1]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="'+data[i+1]['image']+'" ></button><p><b>'+data[i+1]['nom']+'</b></p></div></div>'
             }else{
-                inner = inner + '<div class="col mt-2"></div></div>'
+                inner = inner + '<div class="col mt-3"></div></div>'
             }
         }
         liste.innerHTML= inner;
     }
 
-    document.getElementById("boutton_favoris").addEventListener("click", function(event){
-        event.preventDefault();
-        favoris(id);
-    });
-    playlists = document.getElementsByClassName("playlist")
+    playlists = document.getElementsByClassName("play")
     for (i = 0; i < playlists.length; i++) {
         playlists[i].addEventListener("click", function(event){
-            id = event.target.value;
-            playlists(id);
+            id_playlist_library = event.currentTarget.getAttribute("value");
+            library(id_playlist_library);
         });
     }
   
 }
 function accueil(id=-1){
+    inaccueil = true;
+    inlibrary = inrecherche = false;
     if(id!=-1){
         getMusique(id);
     }
@@ -159,15 +263,7 @@ function accueil(id=-1){
         <div class="col"></div>
         <div class="col-5 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:45%; height:100%;">
             <div id="playlists_accueil">
-            <div class="row">
-                <div class="col mt-2">
-                    <button class="btn btn-secondary" id="boutton_favoris" style="width:10em; height:10em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button>
-                    <p>Favoris</p>
-                </div>
-                <div class="col mt-2" id="playlist_accueil">
-                    
-                </div>
-            </div>
+
             </div>
         </div>
     </div>
@@ -176,14 +272,12 @@ function accueil(id=-1){
     getHistorique();
     document.getElementById("recherche_submit").addEventListener("click", function(event){
         event.preventDefault();
-        console.log("sssssssssss")
         search = document.getElementById('recherche').value;
-        document.getElementById('recherche').value = "";
         radios = document.getElementsByName("parqui");
         for (var i = 0; i < radios.length; i++) {
             if (radios[i].checked) {
                 recherche();
-                ajaxRequest('GET','../php/request.php/recherche?search='+search+'&who='+radios[i].value,printRecherche);
+                ajaxRequest('GET','../php/request.php/recherche?search='+search+'&who='+radios[i].value+'&id_user='+id_user,printRecherche);
                 break;
             }
         }
@@ -191,8 +285,89 @@ function accueil(id=-1){
 }
 
 
-
+// Recherche
+function getRecherche(){
+    search = document.getElementById('recherche').value;
+    radios = document.getElementsByName("parqui");
+    for (var i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+            ajaxRequest('GET','../php/request.php/recherche?search='+search+'&who='+radios[i].value+'&id_user='+id_user,printRecherche);
+            break;
+        }
+    }
+}
+function printRecherche(data){
+    nbresult = data.length
+    liste = document.getElementById("recherche_page");
+    inner ='<table class="table text-center align-middle">';
+    if(data[0]=="musique"){
+        inner = inner + '<thead><tr><th></th><th>Titre</th><th>Album</th><th>Artiste</th><th>Durée</th><th>Date de parution</th><th></th></thead><tbody>'
+        for(i=1;i<nbresult;i++){
+            inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i][1]['id_musique']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i][1]['image']+'" ></button></td><td>'+data[i][1]['titre']+'</td><td>'+data[i][1]['anom']+'</td><td>'+data[i][1]['rnom']+'</td><td>'+data[i][1]['duree']+'</td><td>'+data[i][1]['date_parution']+'</td><td>'+`
+            <div class="col d-flex align-items-center">
+                <div class="row">
+                    <div class="col d-flex justify-content-start">
+                        <button type="button" class="btn btn-outline-danger favrech">`;
+            if(data[i][0]==true){
+                inner = inner + '<i class="fa-solid fa-heart" id="true" value="'+data[i][1]['id_musique']+'"></i>';
+            }else{
+                inner = inner + '<i class="fa-regular fa-heart" id="false" value="'+data[i][1]['id_musique']+'"></i>';
+            }
+            inner = inner +`
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-success detailr" value="`+data[i][1]['id_musique']+`">
+                            <i class="fa-solid fa-info"></i>
+                        </button>
+                    </div>
+                    <div class="col d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-dark modalclassr" data-bs-toggle="modal" data-bs-target="#myModal" value="`+data[i][1]['id_musique']+`">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div></td></tr>`
+        }
+    }else if(data[0]=="album"){
+        inner = inner + "<thead><tr><th></th><th>Nom de l'album</th><th>Artiste</th><th>Date de parution</th></thead><tbody>"
+        for(i=1;i<nbresult;i++){
+            inner = inner + '<tr><td><button class="btn btn-secondary album" value="'+data[i]['id_album']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['anom']+'</td><td>'+data[i]['rnom']+'</td><td>'+data[i]['date_parution']+'</td></tr>'
+        }
+    }else if(data[0]=="artiste"){
+        inner = inner + "<thead><tr><th></th><th>Nom de l'artiste</th></thead><tbody>"
+        for(i=1;i<nbresult;i++){
+            inner = inner + '<tr><td><button class="btn btn-secondary artiste" value="'+data[i]['id_album']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['nom']+'</td></tr>'
+        }
+    }
+    liste.innerHTML= inner + '</tbody></table>';
+    if(data[0]=="musique"){
+        classe = document.getElementsByClassName("favrech")
+        checkFav(classe,refreshrecherche);
+        classeadd = document.getElementsByClassName("modalclassr");
+        checkPlus(classeadd);
+        classD = document.getElementsByClassName("detailr");
+        CheckDetail(classD);
+        playlists = document.getElementsByClassName("musique")
+        for (i = 0; i < playlists.length; i++) {
+            playlists[i].addEventListener("click", function(event){
+                id = event.currentTarget.value;
+                getMusique(id);
+            });
+        }  
+    }else if(data[0]=='album'){
+        albums = document.getElementsByClassName("album")
+        for (i = 0; i < albums.length; i++) {
+            albums[i].addEventListener("click", function(event){
+                id = event.currentTarget.value;
+                getDetailAlbum(id);
+            });
+        }
+    }
+}
 function recherche(){
+    inrecherche= true;
+    inlibrary = inaccueil = false;
     page.innerHTML = `
     <br>
     <div class="row">
@@ -241,67 +416,402 @@ function recherche(){
 
     document.getElementById("recherche_submit").addEventListener("click", function(event){
         event.preventDefault();
-        search = document.getElementById('recherche').value;
-        document.getElementById('recherche').value = "";
-        radios = document.getElementsByName("parqui");
-        for (var i = 0; i < radios.length; i++) {
-            if (radios[i].checked) {
-                ajaxRequest('GET','../php/request.php/recherche?search='+search+'&who='+radios[i].value,printRecherche);
-                break;
-            }
-        }
-    }); 
+        getRecherche();
+    });
 }
-function printRecherche(data){
-    console.log(data[0]);
-    nbresult = data.length
-    liste = document.getElementById("recherche_page");
-    inner ='<table class="table text-center align-middle">';
-    if(data[0]=="musique"){
-        inner = inner + '<thead><tr><th></th><th>Titre</th><th>Album</th><th>Artiste</th><th>Durée</th><th>Date de parution</th><th></th></thead><tbody>'
-        for(i=1;i<nbresult;i++){
-            inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i]['id_musique']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['titre']+'</td><td>'+data[i]['anom']+'</td><td>'+data[i]['rnom']+'</td><td>'+data[i]['duree']+'</td><td>'+data[i]['date_parution']+'</td><td>'+`
-            <div class="col d-flex align-items-center">
-                <div class="row">
-                    <div class="col d-flex justify-content-start">
-                        <button type="button" class="btn btn-outline-danger">
-                            <i class="fa-solid fa-heart" style="color:red;"></i>
-                            <!--
-                                <i class="fa-regular fa-heart"></i>
-                            -->
-                        </button>
-                    </div>
-                    <div class="col">
-                        <button type="button" class="btn btn-outline-success">
-                            <i class="fa-solid fa-info"></i>
-                        </button>
-                    </div>
-                    <div class="col d-flex justify-content-end">
-                        <button type="button" class="btn btn-outline-dark">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
+
+
+// Playlists
+function getPlaylistsLibrary(){
+    ajaxRequest('GET','../php/request.php/accueil/playlists?id_user='+id_user,printPlaylistsLibrary);
+}
+function printPlaylistsLibrary(data){
+    nbplaylistl = data.length;
+    liste = document.getElementById("liste_playlists");
+    inner ='<table class="table text-center align-middle"><thead><tr><th></th><th>Date de creation</th><th>Nb de musiques</th><th></th></thead><tbody><tr><td><button class="btn btn-secondary play" value="'+data[0]['id_playlist']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button><p>Favoris</p></td><td>'+data[0]['date_creation']+'<br><br><br></td><td>'+data[0]['count']+'<br><br><br></td><td></td></tr>'
+    for(i=1;i<nbplaylistl;i++){
+        inner = inner + '<tr><td><button class="btn btn-secondary play" value="'+data[i]['id_playlist']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button><p>'+data[i]['nom']+'</p></td><td>'+data[i]['date_creation']+'<br><br><br></td><td>'+data[i]['count']+'<br><br><br></td><td>'+`
+        <div class="col d-flex justify-content-end">
+            <button type="button" class="btn btn-outline-primary playsup" value="`+data[i]['id_playlist']+`">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div><br><br>
+        </td></tr>`
+    }
+    liste.innerHTML = inner + '</tbody></table>';
+    
+    playlists = document.getElementsByClassName("play")
+    for (i = 0; i < playlists.length; i++) {
+        playlists[i].addEventListener("click", function(event){
+            id_playlist_library = event.currentTarget.getAttribute("value");
+            getMusiqueLibrary();
+        });
+    }
+    playlistssup = document.getElementsByClassName("playsup")
+    for (i = 0; i < playlistssup.length; i++) {
+        playlistssup[i].addEventListener("click", function(event){
+            id_playlist_supp = event.currentTarget.getAttribute('value');
+            ajaxRequest('DELETE','../php/request.php/playlists?id_playlist='+id_playlist_supp,getPlaylistsLibrary);
+        });
+    }
+}
+function getMusiqueLibrary(){
+    ajaxRequest('GET','../php/request.php/favoris?id_user='+id_user+'&id_playlist='+id_playlist_library,printMusiquesLibrary);
+}
+function printMusiquesLibrary(data){
+    console.log
+    titre = document.getElementById("titre_playlist");
+    titre.innerHTML = "<h2>Liste des musiques de " + data[0] +"</h2>";
+
+    nbm = data.length
+    liste = document.getElementById("liste_musiques");
+    inner ='<div class=" border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:100%; height:100%;"><table class="table text-center align-middle"><thead><tr><th></th><th>Titre</th><th>Artiste</th><th>Durée</th><th>Date '+"d'ajout</th><th></th><th></th></thead><tbody>";
+    for(i=1;i<nbm;i++){
+        inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i][1]['id_musique']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i][1]['image']+'" ></button></td><td><b>'+data[i][1]['titre']+'</b><br>'+data[i][1]['anom']+'</td><td>'+data[i][1]['rnom']+'</td><td>'+data[i][1]['duree']+'</td><td>'+data[i][1]['date_ajout']+'</td><td>'+`
+        <div class="col d-flex align-items-center">
+            <div class="row">
+                <div class="col d-flex justify-content-start">
+                    <button type="button" class="btn btn-outline-danger favlab">`;
+        if(data[i][0]==true){
+            inner = inner + '<i class="fa-solid fa-heart" id="true" value="'+data[i][1]['id_musique']+'"></i>';
+        }else{
+            inner = inner + '<i class="fa-regular fa-heart" id="false" value="'+data[i][1]['id_musique']+'"></i>';
+        }
+        inner = inner +`
+                    </button>
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-outline-success detaill" value="`+data[i][1]['id_musique']+`">
+                        <i class="fa-solid fa-info"></i>
+                    </button>
+                </div>
+                <div class="col d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-dark modalclassp" data-bs-toggle="modal" data-bs-target="#myModal" value="`+data[i][1]['id_musique']+`">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div></td><td>
+        <div class="col d-flex justify-content-end">
+            <button type="button" class="btn btn-outline-primary supclass" value="`+data[i][1]['id_musique']+`">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </td></tr>`
+    }
+    liste.innerHTML= inner + '</tbody></table></div>';
+    classe = document.getElementsByClassName("favlab");
+    checkFav(classe,refreshlibrary);
+    classeadd = document.getElementsByClassName("modalclassp");
+    checkPlus(classeadd);
+    classD = document.getElementsByClassName("detaill");
+    CheckDetail(classD);
+    playlists = document.getElementsByClassName("musique");
+    for (i = 0; i < playlists.length; i++) {
+        playlists[i].addEventListener("click", function(event){
+            id = event.currentTarget.value;
+            getMusique(id);
+        });
+    } 
+    buttonssupp = document.getElementsByClassName('supclass');
+    for (i = 0; i < buttonssupp.length; i++) {
+        buttonssupp[i].addEventListener("click", function(event){
+            id_musique_supp = event.currentTarget.getAttribute('value');
+            ajaxRequest('DELETE','../php/request.php/modal?id_musique='+id_musique_supp+'&id_playlist='+id_playlist_library,refreshModal);
+        });
+    }
+}
+
+function library(id=-1){
+    inlibrary = true;
+    inrecherche = inaccueil = false;
+    page.innerHTML = `
+    <br>
+    <div class="row">
+        <div class="col-4">
+            <form>
+            <div class="row input-group" style="height:8%">
+                <div class="col">
+                    <div class="form-group">
+                        <label>Nouvelle playlist</label>
+                        <input type="text" class="form-control" placeholder="Nom playlist" id="nom_playlist">
                     </div>
                 </div>
-            </div></td></tr>`
-        }
-    }else if(data[0]=="album"){
-        inner = inner + "<thead><tr><th></th><th>Nom de l'album</th><th>Artiste</th><th>Date de parution</th></thead><tbody>"
-        for(i=1;i<nbresult;i++){
-            inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i]['id_album']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['anom']+'</td><td>'+data[i]['rnom']+'</td><td>'+data[i]['date_parution']+'</td></tr>'
-        }
-    }else if(data[0]=="artiste"){
-        inner = inner + "<thead><tr><th></th><th>Nom de l'artiste</th></thead><tbody>"
-        for(i=1;i<nbresult;i++){
-            inner = inner + '<tr><td><button class="btn btn-secondary musique" value="'+data[i]['id_album']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['nom']+'</td></tr>'
-        }
+                <div class="col-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary" id="nvplaylist">Créer</button>
+                </div>
+            </div>
+            </form>
+        </div>
+        <div class="col"></div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-3 text-center" style="width:30%; height:100%;">
+            <h2>Liste des playlists</h2>
+        </div>
+        <div class="col-1"></div>
+        <div class="col text-center" id="titre_playlist">
+            
+        </div>
+    </div>
+    <div class="row" style="height:66%">
+        <div class="col-3 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:30%; height:100%;">
+            <div id="liste_playlists">
+            
+            </div>
+        </div>
+        <div class="col-1"></div>
+        <div class="col">
+            <div id="liste_musiques">
+                
+            </div>
+        </div>
+    </div>
+    <div class="row" style="height:4%"></div>`;
+    getPlaylistsLibrary();
+    if(id!=-1){
+        getMusiqueLibrary();
     }
-    liste.innerHTML= inner + '</tbody></table>';
+    document.getElementById("nvplaylist").addEventListener("click", function(event){
+        event.preventDefault();
+        nom_playlist = document.getElementById("nom_playlist").value;
+        document.getElementById("nom_playlist").value = "";
+        if(nom_playlist!=""){
+            ajaxRequest('POST','../php/request.php/playlists',getPlaylistsLibrary,'nom_playlist='+nom_playlist+'&id_user='+id_user);
+        }
+    });
+}
+
+// Profil
+function getProfil(){
+    ajaxRequest('GET','../php/request.php/profil?id_user='+id_user,printProfil);
+}
+function printProfil(data){
+    document.getElementById("info_profil").innerHTML = `
+    <br>
+    <form>
+        <div class="form-outline mb-4 row">
+            <div class="col">
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" class="form-control" value="`+data['nom']+`" id="nom">
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label>Prenom</label>
+                    <input type="text" class="form-control" value="`+data['prenom']+`" id="prenom">
+                </div>
+            </div>
+        </div>
+        <div class="form-outline mb-4 row">
+            <div class="col">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" value="`+data['email']+`" id="email">
+                </div>
+            </div>
+        </div>
+        <div class="form-outline mb-4 row">
+            <div class="col">
+                <div class="form-group">
+                    <label>Date de naissance</label>
+                    <input type="date" id="date_naissance" value="`+data['date_naissance']+`" min="1970-01-01" max="2010-12-31" id="date_naissance" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="form-outline mb-4 row">
+            <div class="col">
+                <label class="form-label">Nouveau mot de passe</label>
+                <input type="password" id="mdp1" class="form-control" />
+            </div>
+            <div class="col">
+                <label class="form-label">Confirmation mot de passe</label>
+                <input type="password" id="mdp2" class="form-control" />
+            </div>
+        </div>
+        <div id="succes"></div>
+        <section id="errors" class="container alert alert-danger d-none">
+        </section>
+        <div class="form-outline mb-4 row text-center">
+            <div class="col">
+                <button type="submit" id="modifier" class="btn btn-primary btn-block mb-4" style="width:50%;">Modifier</button>
+            </div>
+        </div>
+    </form>
+    `;
+    boutonmodif = document.getElementById("modifier");
+    boutonmodif.addEventListener("click", function(event){
+        event.preventDefault();
+        nom = document.getElementById("nom").value;
+        prenom = document.getElementById("prenom").value;
+        email = document.getElementById("email").value;
+        date_naissance = document.getElementById("date_naissance").value;
+        mdp1 = document.getElementById("mdp1").value;
+        mdp2 = document.getElementById("mdp2").value;
+        if(nom!="" && prenom!="" && date_naissance!="" && email!="" && mdp1!=""){
+            if(mdp1!=mdp2){
+                document.getElementById("errors").style.display = "block";
+                document.getElementById("errors").innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> '+'Mot de passe incorrect';
+                document.getElementById("errors").classList.remove("d-none");
+            }else{
+                request = 'nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
+                console.log(request);
+                ajaxRequest('PUT','../php/request.php/profil',getProfil,request);
+                accueil();
+            }   
+        }
+    });
+}
+
+function profil(){
+    inrecherche = inaccueil = inlibrary = false;
+    page.innerHTML = `
+    <br>
+    <h1 class="text-center">Profil</h1>
+    <div class="row" style="height:78%;">
+        <div class="col"></div>
+        <div class="col-4" id="info_profil"></div>
+        <div class="col-2"></div>
+        <div class="col-4 text-center">
+            <div class="row" style="height:45%;"></div>
+            <div class="row">
+                <div class="col text-center">
+                    <button type="button" class="btn btn-primary" id="deconnect" style="width:50%;">DECONNEXION</button>
+                </div>
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row" style="height:4%"></div>`;
+    boutondeconect = document.getElementById("deconnect");
+    boutondeconect.addEventListener("click", function(){
+        document.location.href="../connexion.php"; 
+    });
+    getProfil();
+}
+
+// Detail
+function getDetailMusique(id_musique_detail){
+    ajaxRequest('GET','../php/request.php/detailM?id_musique='+id_musique_detail,printdetailMusique);
+}
+function printdetailMusique(data){
+    inrecherche = inaccueil = inlibrary = false;
+    page.innerHTML = `
+    <div class="row" style="height:18%"></div>
+    <div class="row" style="height:64%">
+        <div class="col"></div>
+        <div class="col-6 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:60%; height:100%;">
+            <div class="row mt-3">
+                <div class="col-4">
+                    <button class="btn btn-secondary album" value="`+data['id_album']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data['aimage']+`"></button>
+                    <p>
+                        <b>`+data['anom']+`</b><br>Style : `+data['style_album']+`
+                    </p>
+                </div>
+                <div class="col-4">
+                    <button class="btn btn-secondary musique" value="`+data['id_musique']+`" style="width:80%; height:75%;"><img class="img-fluid rounded" src="`+data['image']+`"></button>
+                    <p>
+                       <b>`+data['titre']+`</b><br>`+data['anom']+`<br><i>`+data['rnom']+`</i> 
+                    </p>
+                </div>
+                <div class="col-4">
+                    <button class="btn btn-secondary artiste" value="`+data['id_artiste']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data['rimage']+`"></button>
+                    <p>
+                        <b>`+data['rnom']+`</b><br>Type : `+data['type_artiste']+`
+                    </p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+                    Durée : `+data['duree']+`<br>
+                    Date de parution : `+data['date_parution']+`<br>
+                </div>
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row" style="height:18%"></div>`;
+    musiques = document.getElementsByClassName("musique")
+    for (i = 0; i < musiques.length; i++) {
+        musiques[i].addEventListener("click", function(event){
+            id = event.currentTarget.value;
+            getMusique(id);
+        });
+    }
+    albums = document.getElementsByClassName("album")
+    for (i = 0; i < albums.length; i++) {
+        albums[i].addEventListener("click", function(event){
+            id = event.currentTarget.value;
+            getDetailAlbum(id);
+        });
+    }
+}
+
+// Detail Album
+function getDetailAlbum(id_album_detail){
+    ajaxRequest('GET','../php/request.php/detailAl?id_album='+id_album_detail,printdetailAlbum);
+}
+function printdetailAlbum(data){
+    console.log(data);
+    inrecherche = inaccueil = inlibrary = false;
+    inner = `
+    <br>
+    <div class="row" style="height:91%">
+        <div class="col"></div>
+        <div class="col-6 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:60%; height:100%;">
+            <div class="row mt-3">
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <button class="btn btn-secondary" value="`+data[0]['id_album']+`" style="width:80%; height:75%;"><img class="img-fluid rounded" src="`+data[0]['aimage']+`"></button>
+                    <p>
+                       <b>`+data[0]['anom']+`</b><br>Style : `+data[0]['style_album']+`
+                    </p>
+                </div>
+                <div class="col-4">
+                    <button class="btn btn-secondary artiste" value="`+data['id_artiste']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data[0]['rimage']+`"></button>
+                    <p>
+                        <b>`+data[0]['rnom']+`</b><br>Style : `+data[0]['type_artiste']+`
+                    </p>
+                </div>
+            </div><br>
+            <div class="row"><div class="col">`
+    for(i=0;i<data[1].length;i=i+5){
+        inner = inner + '<div class="row mt-3">';
+        for(j=i;j<i+5;j++){
+            if(j<data[1].length){
+                inner = inner +`
+                <div class="col">
+                    <button class="btn btn-secondary musique" value="`+data[1][j]['id_musique']+`" style="width:80%; height:65%;"><img class="img-fluid rounded" src="`+data[1][j]['image']+`"></button>
+                    <p><b>`+data[1][j]['titre']+`</b><br>
+                        <button type="button" class="btn btn-outline-success detaill" value="`+data[1][j]['id_musique']+`">
+                            <i class="fa-solid fa-info"></i>
+                        </button>
+                    </p>
+                </div>
+                `;
+            }else{
+                inner = inner + '<div class="col"></div>';
+            }
+        }
+        inner = inner + '</div>';
+    }
+    inner = inner +`
+            </div></div>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row" style="height:4%"></div>`;
+    page.innerHTML = inner;
 }
 
 
-
-
-
+document.getElementById("addMusic").addEventListener("click", function(){
+    id_musique = document.getElementById("id_musique_modal").getAttribute('value');
+    id_playlist = document.getElementById("id_playlist_modal").value;
+    ajaxRequest('POST','../php/request.php/modal',refreshModal,'id_musique='+id_musique+'&id_playlist='+id_playlist);
+});
 
 accueil();
 getMusique();

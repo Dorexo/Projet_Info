@@ -1,1 +1,1 @@
-SELECT a.nom as "anom", r.nom as "rnom", a.image, a.date_parution FROM albums a JOIN artiste r ON a.id_artiste=r.id_artiste WHERE a.nom ILIKE CONCAT('%','t', '%') ORDER BY a.nom
+SELECT id_musique,image,titre FROM musiques WHERE id_album = 1

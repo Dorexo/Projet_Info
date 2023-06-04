@@ -35,7 +35,7 @@
                     <div class="form-outline mb-4 row">
                         <div class="col">
                             <label class="form-label">Date de naissance</label>
-                            <input type="date" id="date_naissance" value="2000-01-01" min="1970-01-01" max="2010-12-31" name="date_naissance" class="form-control" />
+                            <input type="date" id="date_naissance" value="2000-01-01" min="1970-01-01" max="2010-12-31"  class="form-control" />
                         </div>
                     </div>
                     <div class="form-outline mb-4 row">

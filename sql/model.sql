@@ -52,7 +52,7 @@ CREATE TABLE artistes(
 
 CREATE TABLE styles(
         id_style SERIAL PRIMARY KEY,
-        style_musique     Varchar (50) NOT NULL
+        style_album     Varchar (50) NOT NULL
 );
 
 -- Table: albums

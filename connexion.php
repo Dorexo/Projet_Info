@@ -1,6 +1,7 @@
 <?php
     session_start();
-
+    $_SESSION['id'] = $_SESSION['connected'] = NULL;
+    
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
 
@@ -61,10 +62,8 @@
                                         $ERREUR_mdp = true;
                                     }else {
                                         $_SESSION['id'] = $user[0];
-                                        $_SESSION['nom'] = $user[1];
-                                        $_SESSION['prenom'] = $user[2];
                                         $_SESSION['connected'] = true;
-                                        header('Location: pages/index.php');
+                                        header('Location: page/index.php');
                                     }
                                 }
                             ?>

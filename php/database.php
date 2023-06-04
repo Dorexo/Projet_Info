@@ -67,7 +67,7 @@
                 $stmt->execute();
 
                 $id = dbGetUser($db,$email,$mdp)[0];
-                $date = date("Y-m-d",time());
+                $date = date("d-m-Y",time());
 
                 $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES ('Favoris', :date_creation, :id_user)");
                 $stmt->bindParam(':date_creation', $date);
@@ -91,7 +91,7 @@
 
     function dbGetPlaylists($db,$id_user){
         try{
-            $request = "SELECT p.id_playlist, p.nom, m.image FROM playlists p JOIN musique_dans_playlists c ON c.id_playlist=p.id_playlist JOIN musiques m ON m.id_musique=c.id_musique where p.id_user=:id_user and nom!='Favoris' and nom!='Historique' and m.id_musique=(SELECT id_musique FROM musique_dans_playlists l WHERE p.id_playlist=l.id_playlist LIMIT 1)";
+            $request = "SELECT p.id_playlist, p.nom, m.image, p.date_creation, (SELECT count(*) from musique_dans_playlists mdp  WHERE mdp.id_playlist=p.id_playlist) FROM playlists p LEFT JOIN musique_dans_playlists c ON c.id_playlist=p.id_playlist LEFT JOIN  musiques m ON m.id_musique=c.id_musique  and m.id_musique=(SELECT id_musique FROM musique_dans_playlists l WHERE p.id_playlist=l.id_playlist LIMIT 1) where p.id_user=:id_user and nom!='Favoris' and nom!='Historique' ORDER BY UPPER(p.nom)";
             $statement = $db->prepare($request);
             $statement->bindParam(':id_user', $id_user);   
             $statement->execute();
@@ -101,6 +101,19 @@
             return false;
         }
     }
+    function dbGetid_favoris($db,$id_user){
+        try {
+            $request = "SELECT p.id_playlist,p.date_creation,(SELECT count(*) from musique_dans_playlists mdp JOIN playlists pp ON pp.id_playlist=mdp.id_playlist WHERE pp.nom='Favoris' AND pp.id_user= :id_user) FROM playlists p WHERE p.nom='Favoris' AND p.id_user= :id_user";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
 
     function deleteHistorique($db,$id_user){
         try {
@@ -140,7 +153,7 @@
             $stmt->bindParam(':id_user', $id_user);
             $stmt->execute();
             $id_playlist = $stmt->fetch(PDO::FETCH_ASSOC)['id_playlist'];
-            $date_ajout = date("Y-m-d H:i:s",time());
+            $date_ajout = date("d-m-Y H:i:s",time());
             $stmt = $db->prepare("INSERT INTO musique_dans_playlists (date_ajout, id_playlist, id_musique) VALUES (:date_ajout, :id_playlist, :id_musique)");
             $stmt->bindParam(':date_ajout', $date_ajout);
             $stmt->bindParam(':id_playlist', $id_playlist);
@@ -153,12 +166,14 @@
     }
     function ListenMusic($db, $id_musique, $id_user) {
         try {
-            $request = 'SELECT m.titre, m.duree, m.src, m.image, a.nom as "anom", r.nom as "rnom" FROM musiques m JOIN albums a ON m.id_album=a.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE id_musique = :id_musique';
+            $request = 'SELECT m.id_musique, m.titre, m.duree, m.src, m.image, a.nom as "anom", r.nom as "rnom" FROM musiques m JOIN albums a ON m.id_album=a.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE id_musique = :id_musique';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_musique', $id_musique);    
             $statement->execute();
             addHistorique($db,$id_musique, $id_user);
-            return $statement->fetch(PDO::FETCH_ASSOC);
+            $result = [$statement->fetch(PDO::FETCH_ASSOC)];
+            array_unshift($result,isFavoris($db,$id_musique,$id_user));
+            return $result;
         } catch (PDOException $exception){
             error_log('Request error: '. $exception->getMessage());
             return false;
@@ -187,14 +202,19 @@
 
 
     //Recherche
-    function dbSearchMusiques($db, $search) {
+    function dbSearchMusiques($db, $search, $id_user) {
         try {
-            $request = 'SELECT m.id_musique, m.image, titre, a.nom as "anom", r.nom as "rnom", duree, m.date_parution '."FROM musiques m JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE titre ILIKE CONCAT('%',:search::text, '%') ORDER BY titre";
+            $request = 'SELECT m.id_musique, m.image, titre, a.nom as "anom", r.nom as "rnom", duree, m.date_parution '."FROM musiques m JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE titre ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(titre)";
             $statement = $db->prepare($request);
             $statement->bindParam(':search', $search);    
             $statement->execute();
             $research = $statement->fetchall(PDO::FETCH_ASSOC);
-            return $research;
+            $result = [];
+            for($i=0;$i<count($research);$i++){
+                $arry = [isFavoris($db,$research[$i]['id_musique'],$id_user),$research[$i]];
+                array_push($result,$arry);
+            }
+            return $result;
         } catch (PDOException $exception){
             error_log('Request error: '. $exception->getMessage());
             return false;
@@ -202,7 +222,7 @@
     }
     function dbSearchAlbums($db, $search) {
         try {
-            $request = 'SELECT a.id_album,a.nom as "anom", r.nom as "rnom", a.image, a.date_parution '."FROM albums a JOIN artistes r ON a.id_artiste=r.id_artiste WHERE a.nom ILIKE CONCAT('%',:search::text, '%') ORDER BY a.nom";
+            $request = 'SELECT a.id_album,a.nom as "anom", r.nom as "rnom", a.image, a.date_parution '."FROM albums a JOIN artistes r ON a.id_artiste=r.id_artiste WHERE a.nom ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(a.nom)";
             $statement = $db->prepare($request);
             $statement->bindParam(':search', $search);    
             $statement->execute();
@@ -215,12 +235,270 @@
     }
     function dbSearchArtistes($db, $search) {
         try {
-            $request = "SELECT id_artiste, nom, image FROM artistes WHERE nom ILIKE CONCAT('%',:search::text, '%') ORDER BY nom";
+            $request = "SELECT id_artiste, nom, image FROM artistes WHERE nom ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(nom)";
             $statement = $db->prepare($request);
             $statement->bindParam(':search', $search);    
             $statement->execute();
             $research = $statement->fetchall(PDO::FETCH_ASSOC);
             return $research;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+    function isFavoris($db, $id_musique, $id_user) {
+        try {
+            $request = "SELECT COUNT(*) AS favs FROM musiques m
+            JOIN musique_dans_playlists mp ON m.id_musique = mp.id_musique
+            JOIN playlists p ON mp.id_playlist = p.id_playlist
+            JOIN users u ON p.id_user = u.id_user
+            WHERE u.id_user = :id_user AND p.nom = 'Favoris' AND m.id_musique = :id_musique";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);
+            $statement->bindParam(':id_musique', $id_musique);    
+            $statement->execute();
+            $fav = $statement->fetchall(PDO::FETCH_ASSOC);
+            return ($fav[0]['favs'] > 0) ? true : false;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    
+
+    function dbInsertFav($db,$id_musique,$id_user){
+        try {
+            $stmt = $db->prepare("SELECT id_playlist from playlists WHERE id_user=:id_user AND nom='Favoris'");
+            $stmt->bindParam(':id_user', $id_user);
+            $stmt->execute();
+            $id_playlist = $stmt->fetch(PDO::FETCH_ASSOC)['id_playlist'];
+            $date_ajout = date("d-m-Y H:i:s",time());
+
+            $stmt = $db->prepare("INSERT INTO musique_dans_playlists (date_ajout, id_playlist, id_musique) VALUES (:date_ajout, :id_playlist, :id_musique)");
+            $stmt->bindParam(':date_ajout', $date_ajout);
+            $stmt->bindParam(':id_playlist', $id_playlist);
+            $stmt->bindParam(':id_musique', $id_musique);
+            $stmt->execute();
+            return true;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbDeleteFav($db,$id_musique,$id_user){
+        try {
+            $stmt = $db->prepare("SELECT id_playlist from playlists WHERE id_user=:id_user AND nom='Favoris'");
+            $stmt->bindParam(':id_user', $id_user);
+            $stmt->execute();
+            $id_playlist = $stmt->fetch(PDO::FETCH_ASSOC)['id_playlist'];
+
+            $stmt = $db->prepare("DELETE FROM musique_dans_playlists WHERE id_playlist=:id_playlist AND id_musique=:id_musique");
+            $stmt->bindParam(':id_musique', $id_musique);
+            $stmt->bindParam(':id_playlist', $id_playlist);
+            $stmt->execute();
+            return true;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+    function dbGetMusiqueOfPlaylist($db,$id_playlist,$id_user){
+        try {
+            $request = 'SELECT m.id_musique, m.image, titre, a.nom as "anom", r.nom as "rnom", duree, mdp.date_ajout FROM musique_dans_playlists mdp JOIN musiques m ON m.id_musique=mdp.id_musique JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste  WHERE mdp.id_playlist = :id_playlist';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_playlist', $id_playlist);    
+            $statement->execute();
+            $research = $statement->fetchall(PDO::FETCH_ASSOC);
+            $result = [];
+            for($i=0;$i<count($research);$i++){
+                $arry = [isFavoris($db,$research[$i]['id_musique'],$id_user),$research[$i]];
+                array_push($result,$arry);
+            }
+            return $result;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbGetNomPlaylist($db,$id_playlist){
+        try {
+            $request = 'SELECT nom FROM playlists WHERE id_playlist = :id_playlist ORDER BY UPPER(nom)';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_playlist', $id_playlist);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC)['nom'];
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+    // Modal
+    function dbGetPlaylistsWhitoutMusique($db,$id_musique,$id_user){
+        try {
+            $request = "SELECT nom,id_playlist FROM playlists WHERE id_playlist NOT IN (SELECT id_playlist FROM musique_dans_playlists WHERE id_musique = :id_musique) AND nom!='Historique' AND nom!='Favoris' AND id_user=:id_user ORDER BY UPPER(nom)";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_musique', $id_musique);    
+            $statement->bindParam(':id_user', $id_user);    
+            $statement->execute();
+            return $statement->fetchall(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbGetTitreMusique($db,$id_musique){
+        try {
+            $request = "SELECT titre,id_musique FROM musiques WHERE id_musique = :id_musique";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_musique', $id_musique);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbInsertMusique($db,$id_musique,$id_playlist){
+        try {
+            $date_ajout = date("d-m-Y H:i:s",time());
+            $stmt = $db->prepare("INSERT INTO musique_dans_playlists (date_ajout, id_playlist, id_musique) VALUES (:date_ajout,:id_playlist, :id_musique)");
+            $stmt->bindParam(':date_ajout', $date_ajout);
+            $stmt->bindParam(':id_playlist', $id_playlist);
+            $stmt->bindParam(':id_musique', $id_musique);
+            $stmt->execute();
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbDeleteMusique($db,$id_musique,$id_playlist){
+        try {
+            $stmt = $db->prepare("DELETE FROM musique_dans_playlists WHERE id_playlist=:id_playlist AND id_musique=:id_musique");
+            $stmt->bindParam(':id_musique', $id_musique);
+            $stmt->bindParam(':id_playlist', $id_playlist);
+            $stmt->execute();
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+
+    function AlreadyPlaylist($db,$nom,$id_user){
+        try {
+            $request = "SELECT nom FROM playlists WHERE id_user = :id_user";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);    
+            $statement->execute();
+            $noms = $statement->fetchall(PDO::FETCH_ASSOC);
+            for($i=0;$i<count($noms);$i++){
+                if(strtoupper($noms[$i]['nom'])==strtoupper($nom)){
+                    return true;
+                }
+            }
+            return false;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbInsertPlaylist($db,$nom,$id_user){
+        try {
+            if(!AlreadyPlaylist($db,$nom,$id_user)){
+                $date_creation = date("d-m-Y",time());
+                $stmt = $db->prepare("INSERT INTO playlists (nom, date_creation, id_user) VALUES (:nom, :date_creation, :id_user)");
+                $stmt->bindParam(':nom', $nom);
+                $stmt->bindParam(':date_creation', $date_creation);
+                $stmt->bindParam(':id_user', $id_user);
+                $stmt->execute();
+            }
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbDeletePlaylist($db,$id_playlist){
+        try {
+            $stmt = $db->prepare("DELETE FROM musique_dans_playlists WHERE id_playlist=:id_playlist ");
+            $stmt->bindParam(':id_playlist', $id_playlist);
+            $stmt->execute();
+            $stmt = $db->prepare("DELETE FROM playlists WHERE id_playlist=:id_playlist");
+            $stmt->bindParam(':id_playlist', $id_playlist);
+            $stmt->execute();
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+
+    // Profil
+    function dbGetInfoProfil($db,$id_user){
+        try {
+            $request = "SELECT nom,prenom,date_naissance,email FROM users WHERE id_user = :id_user";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbModifProfil($db,$id_user,$nom,$prenom,$email,$date_naissance,$mdp){
+        try {
+            $hash=password_hash($mdp, PASSWORD_DEFAULT);
+            $request = "UPDATE users SET nom=:nom, prenom=:prenomn, email=:email, date_naissance=:date_naissance, mdp=:mdp WHERE id_user = :id_user";
+            $stmt = $db->prepare($request);
+            $stmt->bindParam(':nom', $nom);
+            $stmt->bindParam(':prenom', $prenom);
+            $stmt->bindParam(':date_naissance', $date_naissance);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':mdp', $hash);
+            $stmt->bindParam(':id_user', $id_user);
+            $stmt->execute();
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+    // Detail
+    function dbGetDetailMusique($db,$id_musique){
+        try {
+            $request = 'SELECT m.id_musique,m.titre,m.duree,m.date_parution,m.image, al.id_album, al.nom as "anom", al.image as "aimage", style_album, ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM musiques m JOIN albums al ON al.id_album=m.id_album JOIN artistes ar ON al.id_artiste=ar.id_artiste JOIN styles s ON s.id_style=al.id_style JOIN types t ON t.id_type=ar.id_type WHERE m.id_musique = :id_musique';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_musique', $id_musique);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+    function dbGetMusiqueOfAlbum($db,$id_album){
+        try {
+            $request = 'SELECT id_musique,image,titre FROM musiques WHERE id_album = :id_album';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_album', $id_album);    
+            $statement->execute();
+            return $statement->fetchall(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbGetDetailAlbum($db,$id_album){
+        try {
+            $request = 'SELECT al.id_album, al.nom as "anom", al.image as "aimage", style_album, ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM albums al JOIN artistes ar ON al.id_artiste=ar.id_artiste JOIN styles s ON s.id_style=al.id_style JOIN types t ON t.id_type=ar.id_type WHERE al.id_album = :id_album';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_album', $id_album);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $exception){
             error_log('Request error: '. $exception->getMessage());
             return false;

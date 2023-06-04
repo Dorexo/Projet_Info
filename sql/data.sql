@@ -17,7 +17,8 @@ ALTER SEQUENCE playlists_id_playlist_seq RESTART;
 INSERT INTO playlists (nom, date_creation, id_user) VALUES
 ('Favoris', '2023-05-31', 1),
 ('Historique', '2023-05-31', 1),
-('MyPlaylist', '2023-05-31', 1);
+('MyPlaylist', '2023-05-31', 1),
+('MyPlaylist2', '2023-05-31', 1);
 
 -- --- Populate users table ------------
 ALTER SEQUENCE types_id_type_seq RESTART;
@@ -33,7 +34,7 @@ INSERT INTO artistes (nom, image, id_type) VALUES
 
 -- --- Populate styles table ------------
 ALTER SEQUENCE styles_id_style_seq RESTART;
-INSERT INTO styles (style_musique) VALUES
+INSERT INTO styles (style_album) VALUES
 ('Rap'),
 ('Pop'),
 ('Electro');
