@@ -2,9 +2,11 @@ const page = document.getElementById('page');
 const id_user = document.getElementById("id_user").getAttribute("value");
 var id_playlist_library;
 var id_musique_modal;
+var id_musique_detail;
 var inaccueil;
 var inlibrary;
 var inrecherche;
+var indetail;
 
 // Check Favoris
 function checkFav(classe,callback){
@@ -19,23 +21,18 @@ function checkFav(classe,callback){
         });
     }
 }
-function refreshfoot(){
+function refresh(){
     icon = document.getElementById("foot").children[0];
     if(inrecherche){
         getRecherche();
     }else if(inlibrary){
         library(id_playlist_library);
+    }else if(indetail){
+        getDetailMusique();
     }
     ajaxRequest('GET','../php/request.php/favfoot?id_musique='+icon.getAttribute("value")+'&id_user='+id_user,refreshfavfoot);
 }
-function refreshrecherche(){
-    getRecherche();
-    refreshfoot();
-}
-function refreshlibrary(){
-    library(id_playlist_library);
-    refreshfoot();
-}
+
 function refreshfavfoot(data){
     bouton = document.getElementById("foot");
     if(data[0]==true){
@@ -81,7 +78,7 @@ function printModal(data){
 function refreshModal(data){
     getPlaylistsAndMusique();
     if(inlibrary){
-        refreshfoot();
+        refresh();
     }else if(inaccueil){
         getPlaylists();
     }
@@ -92,7 +89,7 @@ function CheckDetail(classD){
     for (i = 0; i < classD.length; i++) {
         classD[i].addEventListener("click", function(event){
             id_musique_detail = event.currentTarget.getAttribute('value');
-            getDetailMusique(id_musique_detail);
+            getDetailMusique();
         });
     }
 }
@@ -144,7 +141,7 @@ function printMusique(data){
     buttons = document.getElementsByClassName('modalclass');
     checkPlus(buttons);
     classe = document.getElementsByClassName("favfoot");
-    checkFav(classe,refreshfoot);
+    checkFav(classe,refresh);
     classD = document.getElementsByClassName("detailf");
     CheckDetail(classD);
 }
@@ -206,7 +203,7 @@ function printPlaylists(data){
 }
 function accueil(id=-1){
     inaccueil = true;
-    inlibrary = inrecherche = false;
+    inlibrary = inrecherche = indetail = false;
     if(id!=-1){
         getMusique(id);
     }
@@ -337,13 +334,13 @@ function printRecherche(data){
     }else if(data[0]=="artiste"){
         inner = inner + "<thead><tr><th></th><th>Nom de l'artiste</th></thead><tbody>"
         for(i=1;i<nbresult;i++){
-            inner = inner + '<tr><td><button class="btn btn-secondary artiste" value="'+data[i]['id_album']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['nom']+'</td></tr>'
+            inner = inner + '<tr><td><button class="btn btn-secondary artiste" value="'+data[i]['id_artiste']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button></td><td>'+data[i]['nom']+'</td></tr>'
         }
     }
     liste.innerHTML= inner + '</tbody></table>';
     if(data[0]=="musique"){
         classe = document.getElementsByClassName("favrech")
-        checkFav(classe,refreshrecherche);
+        checkFav(classe,refresh);
         classeadd = document.getElementsByClassName("modalclassr");
         checkPlus(classeadd);
         classD = document.getElementsByClassName("detailr");
@@ -363,11 +360,19 @@ function printRecherche(data){
                 getDetailAlbum(id);
             });
         }
+    }else if(data[0]=='artiste'){
+        artistes = document.getElementsByClassName("artiste")
+        for (i = 0; i < artistes.length; i++) {
+            artistes[i].addEventListener("click", function(event){
+                id = event.currentTarget.value;
+                getDetailArtiste(id);
+            });
+        }
     }
 }
 function recherche(){
     inrecherche= true;
-    inlibrary = inaccueil = false;
+    inlibrary = inaccueil = indetail = false;
     page.innerHTML = `
     <br>
     <div class="row">
@@ -501,14 +506,14 @@ function printMusiquesLibrary(data){
     }
     liste.innerHTML= inner + '</tbody></table></div>';
     classe = document.getElementsByClassName("favlab");
-    checkFav(classe,refreshlibrary);
+    checkFav(classe,refresh);
     classeadd = document.getElementsByClassName("modalclassp");
     checkPlus(classeadd);
     classD = document.getElementsByClassName("detaill");
     CheckDetail(classD);
-    playlists = document.getElementsByClassName("musique");
-    for (i = 0; i < playlists.length; i++) {
-        playlists[i].addEventListener("click", function(event){
+    musiques = document.getElementsByClassName("musique");
+    for (i = 0; i < musiques.length; i++) {
+        musiques[i].addEventListener("click", function(event){
             id = event.currentTarget.value;
             getMusique(id);
         });
@@ -524,7 +529,7 @@ function printMusiquesLibrary(data){
 
 function library(id=-1){
     inlibrary = true;
-    inrecherche = inaccueil = false;
+    inrecherche = inaccueil = indetail = false;
     page.innerHTML = `
     <br>
     <div class="row">
@@ -666,7 +671,7 @@ function printProfil(data){
 }
 
 function profil(){
-    inrecherche = inaccueil = inlibrary = false;
+    inrecherche = inaccueil = inlibrary = indetail = false;
     page.innerHTML = `
     <br>
     <h1 class="text-center">Profil</h1>
@@ -693,46 +698,66 @@ function profil(){
 }
 
 // Detail
-function getDetailMusique(id_musique_detail){
-    ajaxRequest('GET','../php/request.php/detailM?id_musique='+id_musique_detail,printdetailMusique);
+function getDetailMusique(){
+    ajaxRequest('GET','../php/request.php/detailM?id_musique='+id_musique_detail+'&id_user='+id_user,printdetailMusique);
 }
 function printdetailMusique(data){
+    indetail = true;
     inrecherche = inaccueil = inlibrary = false;
-    page.innerHTML = `
-    <div class="row" style="height:18%"></div>
-    <div class="row" style="height:64%">
+    inner = `
+    <div class="row" style="height:15%"></div>
+    <div class="row" style="height70%">
         <div class="col"></div>
         <div class="col-6 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:60%; height:100%;">
             <div class="row mt-3">
                 <div class="col-4">
-                    <button class="btn btn-secondary album" value="`+data['id_album']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data['aimage']+`"></button>
+                    <button class="btn btn-secondary album" value="`+data[1]['id_album']+`" style="width:60%; height:45%;"><img class="img-fluid rounded" src="`+data[1]['aimage']+`"></button>
                     <p>
-                        <b>`+data['anom']+`</b><br>Style : `+data['style_album']+`
+                        <b>`+data[1]['anom']+`</b><br>Style : `+data[1]['style_album']+`
                     </p>
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-secondary musique" value="`+data['id_musique']+`" style="width:80%; height:75%;"><img class="img-fluid rounded" src="`+data['image']+`"></button>
+                    <button class="btn btn-secondary musique" value="`+data[1]['id_musique']+`" style="width:80%; height:60%;"><img class="img-fluid rounded" src="`+data[1]['image']+`"></button>
                     <p>
-                       <b>`+data['titre']+`</b><br>`+data['anom']+`<br><i>`+data['rnom']+`</i> 
+                       <b>`+data[1]['titre']+`</b><br>`+data[1]['anom']+`<br><i>`+data[1]['rnom']+`</i><br>
+                       Durée : `+data[1]['duree']+`<br>
+                       Date de parution : `+data[1]['date_parution']+`<br>
                     </p>
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-secondary artiste" value="`+data['id_artiste']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data['rimage']+`"></button>
+                    <button class="btn btn-secondary artiste" value="`+data[1]['id_artiste']+`" style="width:60%; height:45%;"><img class="img-fluid rounded" src="`+data[1]['rimage']+`"></button>
                     <p>
-                        <b>`+data['rnom']+`</b><br>Type : `+data['type_artiste']+`
+                        <b>`+data[1]['rnom']+`</b><br>Type : `+data[1]['type_artiste']+`
                     </p>
                 </div>
             </div>
-            <div class="row mt-3">
-                <div class="col">
-                    Durée : `+data['duree']+`<br>
-                    Date de parution : `+data['date_parution']+`<br>
+            <div class="row mt-3 mb-3">
+                <div class="col d-flex justify-content-start">
+                    <button type="button" class="btn btn-outline-danger favd">`;
+            if(data[0]==true){
+                inner = inner + '<i class="fa-solid fa-heart" id="true" value="'+data[1]['id_musique']+'"></i>';
+            }else{
+                inner = inner + '<i class="fa-regular fa-heart" id="false" value="'+data[1]['id_musique']+'"></i>';
+            }
+            inner = inner +`
+                        </button>
+                    </div>
+                <div class="col"></div>
+                <div class="col d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-dark modalclassd" data-bs-toggle="modal" data-bs-target="#myModal" value="`+data[1]['id_musique']+`">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
             </div>
         </div>
         <div class="col"></div>
     </div>
-    <div class="row" style="height:18%"></div>`;
+    <div class="row" style="height:15%"></div>`;
+    page.innerHTML = inner;
+    buttons = document.getElementsByClassName('modalclassd');
+    checkPlus(buttons);
+    classe = document.getElementsByClassName("favd");
+    checkFav(classe,refresh);
     musiques = document.getElementsByClassName("musique")
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
@@ -747,6 +772,13 @@ function printdetailMusique(data){
             getDetailAlbum(id);
         });
     }
+    artistes = document.getElementsByClassName("artiste")
+    for (i = 0; i < artistes.length; i++) {
+        artistes[i].addEventListener("click", function(event){
+            id = event.currentTarget.value;
+            getDetailArtiste(id);
+        });
+    }
 }
 
 // Detail Album
@@ -754,8 +786,7 @@ function getDetailAlbum(id_album_detail){
     ajaxRequest('GET','../php/request.php/detailAl?id_album='+id_album_detail,printdetailAlbum);
 }
 function printdetailAlbum(data){
-    console.log(data);
-    inrecherche = inaccueil = inlibrary = false;
+    inrecherche = inaccueil = inlibrary = indetail = false;
     inner = `
     <br>
     <div class="row" style="height:91%">
@@ -785,7 +816,7 @@ function printdetailAlbum(data){
                 <div class="col">
                     <button class="btn btn-secondary musique" value="`+data[1][j]['id_musique']+`" style="width:80%; height:65%;"><img class="img-fluid rounded" src="`+data[1][j]['image']+`"></button>
                     <p><b>`+data[1][j]['titre']+`</b><br>
-                        <button type="button" class="btn btn-outline-success detaill" value="`+data[1][j]['id_musique']+`">
+                        <button type="button" class="btn btn-outline-success detaild" value="`+data[1][j]['id_musique']+`">
                             <i class="fa-solid fa-info"></i>
                         </button>
                     </p>
@@ -804,8 +835,83 @@ function printdetailAlbum(data){
     </div>
     <div class="row" style="height:4%"></div>`;
     page.innerHTML = inner;
+    if(data[1].length>0){
+        classD = document.getElementsByClassName("detaild");
+        CheckDetail(classD);
+    }
+    musiques = document.getElementsByClassName("musique")
+    for (i = 0; i < musiques.length; i++) {
+        musiques[i].addEventListener("click", function(event){
+            id = event.currentTarget.value;
+            getMusique(id);
+        });
+    }
+    artistes = document.getElementsByClassName("artiste")
+    for (i = 0; i < artistes.length; i++) {
+        artistes[i].addEventListener("click", function(event){
+            id = event.currentTarget.value;
+            getDetailArtiste(id);
+        });
+    }
 }
 
+// Detail Album
+function getDetailArtiste(id_artiste_detail){
+    ajaxRequest('GET','../php/request.php/detailAr?id_artiste='+id_artiste_detail,printdetailArtiste);
+}
+function printdetailArtiste(data){
+    inrecherche = inaccueil = inlibrary = indetail = false;
+    inner = `
+    <br>
+    <div class="row" style="height:91%">
+        <div class="col"></div>
+        <div class="col-6 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:60%; height:100%;">
+            <div class="row mt-3">
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <button class="btn btn-secondary" value="`+data[0]['id_artiste']+`" style="width:80%; height:75%;"><img class="img-fluid rounded" src="`+data[0]['rimage']+`"></button>
+                    <p>
+                       <b>`+data[0]['rnom']+`</b><br>Type : `+data[0]['type_artiste']+`
+                    </p>
+                </div>
+                <div class="col-4"></div>
+            </div><br>
+            <div class="row"><div class="col">`
+    for(i=0;i<data[1].length;i=i+5){
+        inner = inner + '<div class="row mt-3">';
+        for(j=i;j<i+5;j++){
+            if(j<data[1].length){
+                inner = inner +`
+                <div class="col">
+                    <button class="btn btn-secondary album" value="`+data[1][j]['id_album']+`" style="width:80%; height:75%;"><img class="img-fluid rounded" src="`+data[1][j]['image']+`"></button>
+                    <p><b>`+data[1][j]['nom']+`</b><br></p>
+                </div>
+                `;
+            }else{
+                inner = inner + '<div class="col"></div>';
+            }
+        }
+        inner = inner + '</div>';
+    }
+    inner = inner +`
+            </div></div>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row" style="height:4%"></div>`;
+    page.innerHTML = inner;
+    if(data[1].length>0){
+        classD = document.getElementsByClassName("detaild");
+        CheckDetail(classD);
+    }
+    albums = document.getElementsByClassName("album")
+    for (i = 0; i < albums.length; i++) {
+        albums[i].addEventListener("click", function(event){
+            id = event.currentTarget.value;
+            getDetailAlbum(id);
+        });
+    }
+}
 
 document.getElementById("addMusic").addEventListener("click", function(){
     id_musique = document.getElementById("id_musique_modal").getAttribute('value');

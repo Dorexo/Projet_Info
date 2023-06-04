@@ -504,4 +504,28 @@
             return false;
         }
     }
+    function dbGetAlbumOfArtiste($db,$id_artiste){
+        try {
+            $request = 'SELECT id_album,image,nom FROM albums WHERE id_artiste = :id_artiste';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_artiste', $id_artiste);    
+            $statement->execute();
+            return $statement->fetchall(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbGetDetailArtiste($db,$id_artiste){
+        try {
+            $request = 'SELECT ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM  artistes ar JOIN types t ON t.id_type=ar.id_type WHERE ar.id_artiste = :id_artiste';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_artiste', $id_artiste);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
 ?>

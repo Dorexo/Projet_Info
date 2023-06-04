@@ -1,1 +1,1 @@
-SELECT id_musique,image,titre FROM musiques WHERE id_album = 1
+SELECT id_album,image,nom FROM albums WHERE id_artiste = 1

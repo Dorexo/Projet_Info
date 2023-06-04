@@ -80,11 +80,15 @@
         }
     }elseif($requesttype=="detailM"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
-            $request = dbGetDetailMusique($db,$_GET['id_musique']);
+            $request = [isFavoris($db,$_GET['id_musique'],$_GET['id_user']),dbGetDetailMusique($db,$_GET['id_musique'])];
         }
     }elseif($requesttype=="detailAl"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = [dbGetDetailAlbum($db,$_GET['id_album']),dbGetMusiqueOfAlbum($db,$_GET['id_album'])];
+        }
+    }elseif($requesttype=="detailAr"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = [dbGetDetailArtiste($db,$_GET['id_artiste']),dbGetAlbumOfArtiste($db,$_GET['id_artiste'])];
         }
     }
     
