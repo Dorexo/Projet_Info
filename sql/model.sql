@@ -75,9 +75,7 @@ CREATE TABLE musiques(
         id_musique SERIAL PRIMARY KEY,
         titre      Varchar (50) NOT NULL ,
         duree      Time NOT NULL ,
-        date_parution       DATE NOT NULL,
         src       Varchar (150) NOT NULL ,
-        image     Varchar (150) NOT NULL ,
         id_album    Int NOT NULL
 
         ,CONSTRAINT musiques_albums_FK FOREIGN KEY (id_album) REFERENCES albums(id_album)

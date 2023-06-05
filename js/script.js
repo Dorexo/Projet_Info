@@ -179,7 +179,7 @@ function printPlaylists(data){
     nbplaylist = data.length
     
     liste = document.getElementById("playlists_accueil");
-    inner = `<div class="row"><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[0]['id_playlist']+'"style="width:11em; height:11em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button><p><b>Favoris</b></p></div>`;
+    inner = '<div class="row"><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[0]['id_playlist']+'"style="width:11em; height:11em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button><p><b>Favoris</b></p></div>';
     if(nbplaylist>1){
         if(data[1]['image']==null){
             data[1]['image']="../ressources/Playlists/playlists.png";
@@ -481,8 +481,9 @@ function getMusiqueLibrary(){
     ajaxRequest('GET','../php/request.php/favoris?id_user='+id_user+'&id_playlist='+id_playlist_library,printMusiquesLibrary);
 }
 function printMusiquesLibrary(data){
+    console.log(data);
     titre = document.getElementById("titre_playlist");
-    titre.innerHTML = "<h2>Liste des musiques de " + data[0] +"</h2>";
+    titre.innerHTML = "<h2 value='" + data[0]['id_playlist'] +"'>Liste des musiques de " + data[0]['nom'] +"</h2>";
 
     nbm = data.length
     liste = document.getElementById("liste_musiques");
@@ -592,6 +593,7 @@ function library(id=-1){
     <div class="row" style="height:4%"></div>`;
     getPlaylistsLibrary();
     if(id!=-1){
+        id_playlist_library = id;
         getMusiqueLibrary();
     }
     document.getElementById("nvplaylist").addEventListener("click", function(event){
@@ -677,12 +679,15 @@ function printProfil(data){
                 document.getElementById("errors").innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> '+'Mot de passe incorrect';
                 document.getElementById("errors").classList.remove("d-none");
             }else{
-                request = 'nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
+                request = '&id_user='+id_user+'&nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
                 ajaxRequest('PUT','../php/request.php/profil',getProfil,request);
                 //accueil();
             }   
         }
     });
+}
+function aa(data){
+    console.log(data);
 }
 
 function profil(){
@@ -732,7 +737,7 @@ function printdetailMusique(data){
                     </p>
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-secondary musique" value="`+data[1]['id_musique']+`" style="width:80%; height:60%;"><img class="img-fluid rounded" src="`+data[1]['image']+`"></button>
+                    <button class="btn btn-secondary musique" value="`+data[1]['id_musique']+`" style="width:80%; height:60%;"><img class="img-fluid rounded" src="`+data[1]['aimage']+`"></button>
                     <p>
                        <b>`+data[1]['titre']+`</b><br>`+data[1]['anom']+`<br><i>`+data[1]['rnom']+`</i><br>
                        Durée : `+data[1]['duree']+`<br>

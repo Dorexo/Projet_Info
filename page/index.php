@@ -42,7 +42,7 @@ if (!$_SESSION['connected']) {
                     </li>
                 </ul>
             </div>
-            <a class="nav-link" href="#" onclick="profil()" id="id_user" value=<?php echo $_SESSION['id']; ?>>Profil </i><i class="fa-solid fa-user"></i></a>
+            <a class="nav-link" href="#" onclick="profil()" id="id_user" value="<?php echo $_SESSION['id']; ?>">Profil </i><i class="fa-solid fa-user"></i></a>
             </ul>
         </div>
     </nav>

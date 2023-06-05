@@ -1,7 +1,7 @@
 <?php
     session_start();
     $_SESSION['id'] = $_SESSION['connected'] = NULL;
-    
+
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
 

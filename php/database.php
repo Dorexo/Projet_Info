@@ -91,7 +91,7 @@
 
     function dbGetPlaylists($db,$id_user){
         try{
-            $request = "SELECT p.id_playlist, p.nom, m.image, p.date_creation, (SELECT count(*) from musique_dans_playlists mdp  WHERE mdp.id_playlist=p.id_playlist) FROM playlists p LEFT JOIN musique_dans_playlists c ON c.id_playlist=p.id_playlist LEFT JOIN  musiques m ON m.id_musique=c.id_musique  and m.id_musique=(SELECT id_musique FROM musique_dans_playlists l WHERE p.id_playlist=l.id_playlist LIMIT 1) where p.id_user=:id_user and nom!='Favoris' and nom!='Historique' ORDER BY UPPER(p.nom)";
+            $request = "SELECT p.id_playlist, p.nom, al.image, p.date_creation, (SELECT count(*) from musique_dans_playlists mdp  WHERE mdp.id_playlist=p.id_playlist) FROM playlists p LEFT JOIN musique_dans_playlists c ON c.id_playlist=p.id_playlist LEFT JOIN  musiques m ON m.id_musique=c.id_musique JOIN albums al ON m.id_album=al.id_album and m.id_musique=(SELECT id_musique FROM musique_dans_playlists l WHERE p.id_playlist=l.id_playlist LIMIT 1) where p.id_user=:id_user and p.nom!='Favoris' and p.nom!='Historique' ORDER BY UPPER(p.nom)";
             $statement = $db->prepare($request);
             $statement->bindParam(':id_user', $id_user);   
             $statement->execute();
@@ -179,7 +179,7 @@
     }
     function ListenMusic($db, $id_musique, $id_user) {
         try {
-            $request = 'SELECT m.id_musique, m.titre, m.duree, m.src, m.image, a.nom as "anom", r.nom as "rnom" FROM musiques m JOIN albums a ON m.id_album=a.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE id_musique = :id_musique';
+            $request = 'SELECT m.id_musique, m.titre, m.duree, m.src, a.image, a.nom as "anom", r.nom as "rnom" FROM musiques m JOIN albums a ON m.id_album=a.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE id_musique = :id_musique';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_musique', $id_musique);    
             $statement->execute();
@@ -195,13 +195,12 @@
 
     function dbGetHistorique($db, $user_id) {
         try {
-            $request = 'SELECT m.id_musique, m.titre, m.image, alb.nom as "anom", art.nom as "rnom" FROM musiques m
+            $request = 'SELECT m.id_musique, m.titre, alb.image, alb.nom as "anom", art.nom as "rnom" FROM musiques m
             JOIN musique_dans_playlists d ON m.id_musique = d.id_musique
             JOIN playlists p ON  p.id_playlist = d.id_playlist
-            JOIN users u ON u.id_user = p.id_user
             JOIN albums alb ON alb.id_album = m.id_album
             JOIN artistes art ON art.id_artiste = alb.id_artiste
-            WHERE p.nom ='." 'Historique' AND u.id_user = :id ORDER BY date_ajout DESC";
+            WHERE p.nom ='." 'Historique' AND p.id_user = :id ORDER BY date_ajout DESC";
             $statement = $db->prepare($request);
             $statement->bindParam(':id', $user_id);    
             $statement->execute();
@@ -217,7 +216,7 @@
     //Recherche
     function dbSearchMusiques($db, $search, $id_user) {
         try {
-            $request = 'SELECT m.id_musique, m.image, titre, a.nom as "anom", r.nom as "rnom", duree, m.date_parution '."FROM musiques m JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE titre ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(titre)";
+            $request = 'SELECT m.id_musique, a.image, titre, a.nom as "anom", r.nom as "rnom", duree, a.date_parution '."FROM musiques m JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE titre ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(titre)";
             $statement = $db->prepare($request);
             $statement->bindParam(':search', $search);    
             $statement->execute();
@@ -319,7 +318,7 @@
 
     function dbGetMusiqueOfPlaylist($db,$id_playlist,$id_user){
         try {
-            $request = 'SELECT m.id_musique, m.image, titre, a.nom as "anom", r.nom as "rnom", duree, mdp.date_ajout FROM musique_dans_playlists mdp JOIN musiques m ON m.id_musique=mdp.id_musique JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste  WHERE mdp.id_playlist = :id_playlist';
+            $request = 'SELECT m.id_musique, a.image, titre, a.nom as "anom", r.nom as "rnom", duree, mdp.date_ajout FROM musique_dans_playlists mdp JOIN musiques m ON m.id_musique=mdp.id_musique JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste  WHERE mdp.id_playlist = :id_playlist';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_playlist', $id_playlist);    
             $statement->execute();
@@ -337,11 +336,11 @@
     }
     function dbGetNomPlaylist($db,$id_playlist){
         try {
-            $request = 'SELECT nom FROM playlists WHERE id_playlist = :id_playlist ORDER BY UPPER(nom)';
+            $request = 'SELECT nom,id_playlist FROM playlists WHERE id_playlist = :id_playlist';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_playlist', $id_playlist);    
             $statement->execute();
-            return $statement->fetch(PDO::FETCH_ASSOC)['nom'];
+            return $statement->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $exception){
             error_log('Request error: '. $exception->getMessage());
             return false;
@@ -482,7 +481,7 @@
     // Detail
     function dbGetDetailMusique($db,$id_musique){
         try {
-            $request = 'SELECT m.id_musique,m.titre,m.duree,m.date_parution,m.image, al.id_album, al.nom as "anom", al.image as "aimage", style_album, ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM musiques m JOIN albums al ON al.id_album=m.id_album JOIN artistes ar ON al.id_artiste=ar.id_artiste JOIN styles s ON s.id_style=al.id_style JOIN types t ON t.id_type=ar.id_type WHERE m.id_musique = :id_musique';
+            $request = 'SELECT m.id_musique,m.titre,m.duree, al.id_album, al.nom as "anom", al.image as "aimage", style_album, ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM musiques m JOIN albums al ON al.id_album=m.id_album JOIN artistes ar ON al.id_artiste=ar.id_artiste JOIN styles s ON s.id_style=al.id_style JOIN types t ON t.id_type=ar.id_type WHERE m.id_musique = :id_musique';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_musique', $id_musique);    
             $statement->execute();
@@ -495,7 +494,7 @@
 
     function dbGetMusiqueOfAlbum($db,$id_album){
         try {
-            $request = 'SELECT id_musique,image,titre FROM musiques WHERE id_album = :id_album';
+            $request = 'SELECT id_musique,al.image,titre FROM musiques m JOIN albums al ON al.id_album=m.id_album WHERE m.id_album = :id_album';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_album', $id_album);    
             $statement->execute();
@@ -507,7 +506,7 @@
     }
     function dbGetDetailAlbum($db,$id_album){
         try {
-            $request = 'SELECT al.id_album, al.nom as "anom", al.image as "aimage", style_album, ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM albums al JOIN artistes ar ON al.id_artiste=ar.id_artiste JOIN styles s ON s.id_style=al.id_style JOIN types t ON t.id_type=ar.id_type WHERE al.id_album = :id_album';
+            $request = 'SELECT al.id_album,al.date_parution , al.nom as "anom", al.image as "aimage", style_album, ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM albums al JOIN artistes ar ON al.id_artiste=ar.id_artiste JOIN styles s ON s.id_style=al.id_style JOIN types t ON t.id_type=ar.id_type WHERE al.id_album = :id_album';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_album', $id_album);    
             $statement->execute();

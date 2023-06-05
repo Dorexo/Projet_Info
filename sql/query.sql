@@ -1,1 +1,1 @@
-UPDATE FROM musique_dans_playlists date_ajout=2023-05-06 WHERE id_playlist=1 and id_musique=1
+SELECT id_musique,al.image,titre FROM musiques m JOIN albums al ON al.id_album=m.id_album WHERE id_album = 1
