@@ -138,7 +138,6 @@
             return false;
         }
     }
-
     function addHistorique($db, $id_musique, $id_user){
         try {
             $request = "SELECT COUNT(*) FROM musique_dans_playlists m JOIN playlists p ON m.id_playlist=p.id_playlist WHERE p.nom = 'Historique' and p.id_user=:id_user";
@@ -154,11 +153,25 @@
             $stmt->execute();
             $id_playlist = $stmt->fetch(PDO::FETCH_ASSOC)['id_playlist'];
             $date_ajout = date("d-m-Y H:i:s",time());
-            $stmt = $db->prepare("INSERT INTO musique_dans_playlists (date_ajout, id_playlist, id_musique) VALUES (:date_ajout, :id_playlist, :id_musique)");
-            $stmt->bindParam(':date_ajout', $date_ajout);
+            
+            $stmt = $db->prepare("SELECT id_musique from musique_dans_playlists WHERE id_playlist=:id_playlist and id_musique=:id_musique");
             $stmt->bindParam(':id_playlist', $id_playlist);
             $stmt->bindParam(':id_musique', $id_musique);
             $stmt->execute();
+            $already = $stmt->fetchall(PDO::FETCH_ASSOC);
+            if(empty($already)){
+                $stmt = $db->prepare("INSERT INTO musique_dans_playlists (date_ajout, id_playlist, id_musique) VALUES (:date_ajout, :id_playlist, :id_musique)");
+                $stmt->bindParam(':date_ajout', $date_ajout);
+                $stmt->bindParam(':id_playlist', $id_playlist);
+                $stmt->bindParam(':id_musique', $id_musique);
+                $stmt->execute();
+            }else{
+                $stmt = $db->prepare("UPDATE musique_dans_playlists SET date_ajout=:date_ajout WHERE id_playlist=:id_playlist and id_musique=:id_musique");
+                $stmt->bindParam(':date_ajout', $date_ajout);
+                $stmt->bindParam(':id_playlist', $id_playlist);
+                $stmt->bindParam(':id_musique', $id_musique);
+                $stmt->execute();
+            }
         } catch (PDOException $exception){
             error_log('Request error: '. $exception->getMessage());
             return false;
@@ -451,7 +464,7 @@
     function dbModifProfil($db,$id_user,$nom,$prenom,$email,$date_naissance,$mdp){
         try {
             $hash=password_hash($mdp, PASSWORD_DEFAULT);
-            $request = "UPDATE users SET nom=:nom, prenom=:prenomn, email=:email, date_naissance=:date_naissance, mdp=:mdp WHERE id_user = :id_user";
+            $request = "UPDATE users SET nom=:nom, prenom=:prenom, email=:email, date_naissance=:date_naissance, mdp=:mdp WHERE id_user = :id_user";
             $stmt = $db->prepare($request);
             $stmt->bindParam(':nom', $nom);
             $stmt->bindParam(':prenom', $prenom);

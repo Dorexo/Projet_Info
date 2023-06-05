@@ -1,1 +1,1 @@
-SELECT id_album,image,nom FROM albums WHERE id_artiste = 1
+UPDATE FROM musique_dans_playlists date_ajout=2023-05-06 WHERE id_playlist=1 and id_musique=1

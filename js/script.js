@@ -177,20 +177,34 @@ function getPlaylists(){
 }
 function printPlaylists(data){
     nbplaylist = data.length
-    if(nbplaylist>0){
-        liste = document.getElementById("playlists_accueil");
-        inner = '<div class="row"><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[0]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button><p><b>Favoris</b></p></div><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[1]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="'+data[1]['image']+'" ></button><p><b>'+data[1]['nom']+'</b></p></div></div>';
+    
+    liste = document.getElementById("playlists_accueil");
+    inner = `<div class="row"><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[0]['id_playlist']+'"style="width:11em; height:11em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button><p><b>Favoris</b></p></div>`;
+    if(nbplaylist>1){
+        if(data[1]['image']==null){
+            data[1]['image']="../ressources/Playlists/playlists.png";
+        }
+        inner = inner + '<div class="col mt-3"><button class="btn btn-secondary play" value="'+data[1]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="'+data[1]['image']+'" ></button><p><b>'+data[1]['nom']+'</b></p></div></div>';
         nbplaylist--;
         for(i=2;i<nbplaylist+1;i+=2){
+            if(data[i]['image']==null){
+                data[i]['image']="../ressources/Playlists/playlists.png";
+            }
             inner = inner + '<div class="row"><div class="col mt-3"><button class="btn btn-secondary play" value="'+data[i]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button><p><b>'+data[i]['nom']+'</b></p></div>'
             if(i+1<nbplaylist+1){
+                if(data[i+1]['image']==null){
+                    data[i+1]['image']="../ressources/Playlists/playlists.png";
+                }
                 inner = inner + '<div class="col mt-3"><button class="btn btn-secondary play" value="'+data[i+1]['id_playlist']+'" style="width:11em; height:11em;"><img class="img-fluid rounded" src="'+data[i+1]['image']+'" ></button><p><b>'+data[i+1]['nom']+'</b></p></div></div>'
             }else{
                 inner = inner + '<div class="col mt-3"></div></div>'
             }
         }
-        liste.innerHTML= inner;
+    }else{
+        inner = inner + '<div class="col mt-3"></div></div>'
     }
+    liste.innerHTML= inner;
+
 
     playlists = document.getElementsByClassName("play")
     for (i = 0; i < playlists.length; i++) {
@@ -377,7 +391,6 @@ function recherche(){
     <br>
     <div class="row">
         <div class="col">
-            <form>
             <div class="row input-group" style="height:8%">
                 <div class="col"></div>
                 <div class="col-4 d-flex justify-content-center">
@@ -404,7 +417,6 @@ function recherche(){
                 </div>
                 <div class="col"></div>
             </div>
-            </form>
         </div>
     </div>
     <br>
@@ -419,8 +431,10 @@ function recherche(){
     </div>
     <div class="row" style="height:4%"></div>`;
 
-    document.getElementById("recherche_submit").addEventListener("click", function(event){
-        event.preventDefault();
+    document.getElementById("recherche").addEventListener("keydown", function(){
+        getRecherche();
+    });
+    document.getElementById("recherche_submit").addEventListener("click", function(){
         getRecherche();
     });
 }
@@ -435,6 +449,9 @@ function printPlaylistsLibrary(data){
     liste = document.getElementById("liste_playlists");
     inner ='<table class="table text-center align-middle"><thead><tr><th></th><th>Date de creation</th><th>Nb de musiques</th><th></th></thead><tbody><tr><td><button class="btn btn-secondary play" value="'+data[0]['id_playlist']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="../ressources/Playlists/favoris.png" ></button><p>Favoris</p></td><td>'+data[0]['date_creation']+'<br><br><br></td><td>'+data[0]['count']+'<br><br><br></td><td></td></tr>'
     for(i=1;i<nbplaylistl;i++){
+        if(data[i]['image']==null){
+            data[i]['image']="../ressources/Playlists/playlists.png";
+        }
         inner = inner + '<tr><td><button class="btn btn-secondary play" value="'+data[i]['id_playlist']+'" style="width:5em; height:5em;"><img class="img-fluid rounded" src="'+data[i]['image']+'" ></button><p>'+data[i]['nom']+'</p></td><td>'+data[i]['date_creation']+'<br><br><br></td><td>'+data[i]['count']+'<br><br><br></td><td>'+`
         <div class="col d-flex justify-content-end">
             <button type="button" class="btn btn-outline-primary playsup" value="`+data[i]['id_playlist']+`">
@@ -464,7 +481,6 @@ function getMusiqueLibrary(){
     ajaxRequest('GET','../php/request.php/favoris?id_user='+id_user+'&id_playlist='+id_playlist_library,printMusiquesLibrary);
 }
 function printMusiquesLibrary(data){
-    console.log
     titre = document.getElementById("titre_playlist");
     titre.innerHTML = "<h2>Liste des musiques de " + data[0] +"</h2>";
 
@@ -662,9 +678,8 @@ function printProfil(data){
                 document.getElementById("errors").classList.remove("d-none");
             }else{
                 request = 'nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
-                console.log(request);
                 ajaxRequest('PUT','../php/request.php/profil',getProfil,request);
-                accueil();
+                //accueil();
             }   
         }
     });
@@ -801,7 +816,7 @@ function printdetailAlbum(data){
                     </p>
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-secondary artiste" value="`+data['id_artiste']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data[0]['rimage']+`"></button>
+                    <button class="btn btn-secondary artiste" value="`+data[0]['id_artiste']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data[0]['rimage']+`"></button>
                     <p>
                         <b>`+data[0]['rnom']+`</b><br>Style : `+data[0]['type_artiste']+`
                     </p>
