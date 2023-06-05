@@ -1,0 +1,1 @@
+SELECT id_musique,al.image,titre FROM musiques m JOIN albums al ON al.id_album=m.id_album WHERE id_album = 1
