@@ -90,7 +90,15 @@
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = [dbGetDetailArtiste($db,$_GET['id_artiste']),dbGetAlbumOfArtiste($db,$_GET['id_artiste'])];
         }
+    }elseif($requesttype=="musiqueAlea"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetAleaMusique($db);
+        }
+    }elseif($requesttype=="lastMusique"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetLastMusique($db,$_GET['id_user']);
+        }
     }
-    
+
     echo json_encode($request);
 ?>

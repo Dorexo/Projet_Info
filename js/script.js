@@ -7,6 +7,10 @@ var inaccueil;
 var inlibrary;
 var inrecherche;
 var indetail;
+var inmusic = false;
+
+var id_playlit_lecture = null;
+var id_music;
 
 // Check Favoris
 function checkFav(classe,callback){
@@ -22,7 +26,7 @@ function checkFav(classe,callback){
     }
 }
 function refresh(){
-    icon = document.getElementById("foot").children[0];
+    console.log(inmusic)
     if(inrecherche){
         getRecherche();
     }else if(inlibrary){
@@ -30,7 +34,10 @@ function refresh(){
     }else if(indetail){
         getDetailMusique();
     }
-    ajaxRequest('GET','../php/request.php/favfoot?id_musique='+icon.getAttribute("value")+'&id_user='+id_user,refreshfavfoot);
+    if(inmusic){
+        icon = document.getElementById("foot").children[0];
+        ajaxRequest('GET','../php/request.php/favfoot?id_musique='+icon.getAttribute("value")+'&id_user='+id_user,refreshfavfoot);
+    }
 }
 
 function refreshfavfoot(data){
@@ -95,22 +102,35 @@ function CheckDetail(classD){
 }
 
 // Footer
-function getMusique(id_musique=1){
-    ajaxRequest('GET','../php/request.php/music?id_musique='+id_musique+'&id_user='+id_user,printMusique);
+function getMusique(){
+    inmusic = true;
+    ajaxRequest('GET','../php/request.php/music?id_musique='+id_music+'&id_user='+id_user,printMusique);
 }
 function printMusique(data){
     inner = `
-        <div class="col"></div>
+        <div class="col d-flex align-items-center ms-3">
+            <img class="img-fluid rounded" src="`+data[1]['image']+`" style="width:3em; heigth:3em;">
+        </div>
+        <div class="col-1 d-flex align-items-center ms-3">
+                <div class="col-8"></div>
+                <div class="col d-flex align-items-center justify-content-start">
+                    <a href="#" style="color:black;" onclick="precedant()"><i class="fa-solid fa-backward-step"></i></a>
+                </div>
+                <div class="col d-flex align-items-center justify-content-end ms-4">
+                    <a href="#" style="color:black;" onclick="suivant()"><i class="fa-solid fa-forward-step"></i></a>
+                </div>
+                <div class="col-1"></div>            
+        </div>
         <div class="col-4 d-flex justify-content-center">
-            <audio controls style="width:100%;">
+            <audio controls style="width:100%;" autoplay>
                 <source src="`+data[1]['src']+`">
             </audio>
         </div>
         <div class="col" >
-            <b>`+data[1]['titre']+`</b> par `+data[1]['rnom']+`<br>
-            <b>`+data[1]['anom']+`</b>
+            <b>`+data[1]['titre']+`</b> par <i>`+data[1]['rnom']+`</i><br>
+            `+data[1]['anom']+`
         </div>
-        <div class="col d-flex align-items-center">
+        <div class="col d-flex align-items-center justify-content-end">
             <div class="row">
             <div class="col d-flex justify-content-start">
                 <button type="button" class="btn btn-outline-danger favfoot" id="foot">`;
@@ -146,6 +166,32 @@ function printMusique(data){
     CheckDetail(classD);
 }
 
+function getALea(){
+    ajaxRequest('GET','../php/request.php/musiqueAlea',setIdMusic);
+}
+function getLast(){
+    ajaxRequest('GET','../php/request.php/lastMusique?id_user='+id_user,setIdMusic);
+}
+function setIdMusic(data){
+    if(data){
+        id_music = data;
+        getMusique();
+    }
+}
+
+function suivant(){
+    if(!id_playlit_lecture){
+        getALea();
+    }
+}
+function precedant(){
+    if(!id_playlit_lecture){
+        getLast();
+    }
+}
+
+
+
 // Accueil
 function getHistorique(){
     ajaxRequest('GET','../php/request.php/accueil/historique?id_user='+id_user,printHistorique);
@@ -167,8 +213,8 @@ function printHistorique(data){
     playlists = document.getElementsByClassName("musique")
     for (i = 0; i < playlists.length; i++) {
         playlists[i].addEventListener("click", function(event){
-            id = event.currentTarget.value;
-            getMusique(id);
+            id_music = event.currentTarget.value;
+            getMusique();
         });
     }
 }
@@ -219,7 +265,8 @@ function accueil(id=-1){
     inaccueil = true;
     inlibrary = inrecherche = indetail = false;
     if(id!=-1){
-        getMusique(id);
+        id_music = id
+        getMusique();
     }
     page.innerHTML = `
     <br>
@@ -362,8 +409,8 @@ function printRecherche(data){
         playlists = document.getElementsByClassName("musique")
         for (i = 0; i < playlists.length; i++) {
             playlists[i].addEventListener("click", function(event){
-                id = event.currentTarget.value;
-                getMusique(id);
+                id_music = event.currentTarget.value;
+                getMusique();
             });
         }  
     }else if(data[0]=='album'){
@@ -531,8 +578,8 @@ function printMusiquesLibrary(data){
     musiques = document.getElementsByClassName("musique");
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
-            id = event.currentTarget.value;
-            getMusique(id);
+            id_music = event.currentTarget.value;
+            getMusique();
         });
     } 
     buttonssupp = document.getElementsByClassName('supclass');
@@ -731,21 +778,20 @@ function printdetailMusique(data){
         <div class="col-6 border border-dark rounded text-center" style="background-color:rgb(222,222,222); overflow:auto; width:60%; height:100%;">
             <div class="row mt-3">
                 <div class="col-4">
-                    <button class="btn btn-secondary album" value="`+data[1]['id_album']+`" style="width:60%; height:45%;"><img class="img-fluid rounded" src="`+data[1]['aimage']+`"></button>
+                    <button class="btn btn-secondary album" value="`+data[1]['id_album']+`" style="width:60%; height:48%;"><img class="img-fluid rounded" src="`+data[1]['aimage']+`"></button>
                     <p>
                         <b>`+data[1]['anom']+`</b><br>Style : `+data[1]['style_album']+`
                     </p>
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-secondary musique" value="`+data[1]['id_musique']+`" style="width:80%; height:60%;"><img class="img-fluid rounded" src="`+data[1]['aimage']+`"></button>
+                    <button class="btn btn-secondary musique" value="`+data[1]['id_musique']+`" style="width:80%; height:65%;"><img class="img-fluid rounded" src="`+data[1]['aimage']+`"></button>
                     <p>
                        <b>`+data[1]['titre']+`</b><br>`+data[1]['anom']+`<br><i>`+data[1]['rnom']+`</i><br>
-                       Durée : `+data[1]['duree']+`<br>
-                       Date de parution : `+data[1]['date_parution']+`<br>
+                       Durée : `+data[1]['duree']+`
                     </p>
                 </div>
                 <div class="col-4">
-                    <button class="btn btn-secondary artiste" value="`+data[1]['id_artiste']+`" style="width:60%; height:45%;"><img class="img-fluid rounded" src="`+data[1]['rimage']+`"></button>
+                    <button class="btn btn-secondary artiste" value="`+data[1]['id_artiste']+`" style="width:60%; height:48%;"><img class="img-fluid rounded" src="`+data[1]['rimage']+`"></button>
                     <p>
                         <b>`+data[1]['rnom']+`</b><br>Type : `+data[1]['type_artiste']+`
                     </p>
@@ -781,8 +827,8 @@ function printdetailMusique(data){
     musiques = document.getElementsByClassName("musique")
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
-            id = event.currentTarget.value;
-            getMusique(id);
+            id_music = event.currentTarget.value;
+            getMusique();
         });
     }
     albums = document.getElementsByClassName("album")
@@ -817,16 +863,17 @@ function printdetailAlbum(data){
                 <div class="col-4">
                     <button class="btn btn-secondary" value="`+data[0]['id_album']+`" style="width:80%; height:75%;"><img class="img-fluid rounded" src="`+data[0]['aimage']+`"></button>
                     <p>
-                       <b>`+data[0]['anom']+`</b><br>Style : `+data[0]['style_album']+`
+                       <b>`+data[0]['anom']+`</b><br>Style : `+data[0]['style_album']+`<br>
+                       Date de parution : `+data[0]['date_parution']+`
                     </p>
                 </div>
                 <div class="col-4">
                     <button class="btn btn-secondary artiste" value="`+data[0]['id_artiste']+`" style="width:60%; height:55%;"><img class="img-fluid rounded" src="`+data[0]['rimage']+`"></button>
                     <p>
-                        <b>`+data[0]['rnom']+`</b><br>Style : `+data[0]['type_artiste']+`
+                        <b>`+data[0]['rnom']+`</b><br>Type : `+data[0]['type_artiste']+`
                     </p>
                 </div>
-            </div><br>
+            </div><br><h3 class="text-start">Musiques :</h3>
             <div class="row"><div class="col">`
     for(i=0;i<data[1].length;i=i+5){
         inner = inner + '<div class="row mt-3">';
@@ -862,8 +909,8 @@ function printdetailAlbum(data){
     musiques = document.getElementsByClassName("musique")
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
-            id = event.currentTarget.value;
-            getMusique(id);
+            id_music = event.currentTarget.value;
+            getMusique();
         });
     }
     artistes = document.getElementsByClassName("artiste")
@@ -895,7 +942,7 @@ function printdetailArtiste(data){
                     </p>
                 </div>
                 <div class="col-4"></div>
-            </div><br>
+            </div><br><h3 class="text-start">Albums :</h3>
             <div class="row"><div class="col">`
     for(i=0;i<data[1].length;i=i+5){
         inner = inner + '<div class="row mt-3">';
@@ -940,4 +987,3 @@ document.getElementById("addMusic").addEventListener("click", function(){
 });
 
 accueil();
-getMusique();

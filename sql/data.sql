@@ -53,6 +53,4 @@ INSERT INTO musiques (titre,duree ,src, id_album) VALUES
 -- --- Populate musique_dans_playlists table ------------
 INSERT INTO musique_dans_playlists (date_ajout,id_playlist,id_musique) VALUES
 ('2023-02-02 16:05:06',1,1),
-('2023-02-05 16:05:06',2,1),
-('2023-02-06 15:05:06',2,2),
 ('2023-02-06 16:05:06',3,1);

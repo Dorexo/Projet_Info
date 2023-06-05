@@ -38,7 +38,7 @@ if (!$_SESSION['connected']) {
                         <a class="nav-link" href="#" onclick="recherche()"><i class="fa-solid fa-magnifying-glass"></i> Rechercher</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="library()"><i class="fa-solid fa-list-music"></i> Playlists</a>
+                        <a class="nav-link" href="#" onclick="library()"><i class="fa-solid fa-layer-group"></i> Playlists</a>
                     </li>
                 </ul>
             </div>

@@ -1,1 +1,1 @@
-SELECT id_musique,al.image,titre FROM musiques m JOIN albums al ON al.id_album=m.id_album WHERE id_album = 1
+SELECT m.id_musique FROM musiques m JOIN musique_dans_playlists mdp ON m.id_musique=mdp.id_musique JOIN playlists p ON p.id_playlist=mdp.id_playlist WHERE id_user = 1 and p.nom='Historique' ORDER BY mdp.date_ajout DESC
