@@ -530,7 +530,7 @@ function getMusiqueLibrary(){
 function printMusiquesLibrary(data){
     console.log(data);
     titre = document.getElementById("titre_playlist");
-    titre.innerHTML = "<h2 value='" + data[0]['id_playlist'] +"'>Liste des musiques de " + data[0]['nom'] +"</h2>";
+    titre.innerHTML = "<div class='row'><div class='col'></div><div class='col-6'><h2 value='" + data[0]['id_playlist'] +"'>Liste des musiques de " + data[0]['nom'] +"</h2></div><div class='col d-flex align-items-center'><button type='button' class='btn btn-success' id='playplaylist'><i class='fa-solid fa-play'></i></button></div>";
 
     nbm = data.length
     liste = document.getElementById("liste_musiques");

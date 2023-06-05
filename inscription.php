@@ -12,7 +12,7 @@
         <script src="js/inscription.js" defer></script>
     </head>
     <body>
-        <div class="row h-25"></div>
+        <div class="row" style="height:10%;"></div>
         <div class="row">
             <div class="col"></div>
             <div class="col">
