@@ -698,6 +698,9 @@ function getProfil(){
     ajaxRequest('GET','../php/request.php/profil?id_user='+id_user,printProfil);
 }
 function printProfil(data){
+    date_naissance = new Date(data['date_naissance']);
+    dateage = new Date(Date.now() - date_naissance.getTime());
+    age = dateage.getUTCFullYear() - 1970;
     document.getElementById("info_profil").innerHTML = `
     <br>
     <form>
@@ -728,6 +731,12 @@ function printProfil(data){
                 <div class="form-group">
                     <label style="color:midnightblue">Date de naissance</label>
                     <input type="date" id="date_naissance" value="`+data['date_naissance']+`" min="1970-01-01" max="2010-12-31" id="date_naissance" class="form-control" />
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="form-group">
+                    <label style="color:midnightblue">Âge</label>
+                    <input type="text" value="`+age+` ans" class="form-control" disabled/>
                 </div>
             </div>
         </div>
