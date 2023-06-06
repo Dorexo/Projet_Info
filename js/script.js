@@ -787,15 +787,15 @@ function printProfil(data){
         mdp1 = document.getElementById("mdp1").value;
         mdp2 = document.getElementById("mdp2").value;
         if(nom!="" && prenom!="" && date_naissance!="" && email!="" && mdp1!=""){
-            if(email.includes('@') && email[email.length]!='@'){
+            if(email.includes('@') && email[email.length-1]!='@'){
                 if(mdp1!=mdp2){
                     document.getElementById("errors").style.display = "block";
                     document.getElementById("errors").innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> '+'Mot de passe incorrect';
                     document.getElementById("errors").classList.remove("d-none");
                 }else{
                     request = '&id_user='+id_user+'&nom='+nom+'&prenom='+prenom+'&date_naissance='+date_naissance+'&email='+email+'&mdp='+mdp1;
-                    ajaxRequest('PUT','../php/request.php/profil',getProfil,request);
-                    accueil();
+                    console.log(request)
+                    ajaxRequest('PUT','../php/request.php/profil',accueil,request);
                 }
             }   
         }
