@@ -45,6 +45,10 @@
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = ListenMusic($db,$_GET['id_musique'],$_GET['id_user']);
         }
+    }elseif($requesttype=="inserthistorique"){
+        if($_SERVER['REQUEST_METHOD']=="POST"){
+            $request = addHistorique($db,$_POST['id_musique'],$_POST['id_user']);
+        }
     }elseif($requesttype=="fav"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
             if($_GET['what']=="insert"){
@@ -90,7 +94,15 @@
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = [dbGetDetailArtiste($db,$_GET['id_artiste']),dbGetAlbumOfArtiste($db,$_GET['id_artiste'])];
         }
+    }elseif($requesttype=="musiqueAlea"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetAleaMusique($db);
+        }
+    }elseif($requesttype=="lastMusique"){
+        if($_SERVER['REQUEST_METHOD']=="GET"){
+            $request = dbGetLastMusique($db,$_GET['id_user']);
+        }
     }
-    
+
     echo json_encode($request);
 ?>

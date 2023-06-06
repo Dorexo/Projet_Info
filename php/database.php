@@ -88,10 +88,10 @@
     } 
 
     // ACCEUIL
-
+    
     function dbGetPlaylists($db,$id_user){
         try{
-            $request = "SELECT p.id_playlist, p.nom, al.image, p.date_creation, (SELECT count(*) from musique_dans_playlists mdp  WHERE mdp.id_playlist=p.id_playlist) FROM playlists p LEFT JOIN musique_dans_playlists c ON c.id_playlist=p.id_playlist LEFT JOIN  musiques m ON m.id_musique=c.id_musique JOIN albums al ON m.id_album=al.id_album and m.id_musique=(SELECT id_musique FROM musique_dans_playlists l WHERE p.id_playlist=l.id_playlist LIMIT 1) where p.id_user=:id_user and p.nom!='Favoris' and p.nom!='Historique' ORDER BY UPPER(p.nom)";
+            $request = "SELECT p.id_playlist, p.nom, p.date_creation, (SELECT count(*) from musique_dans_playlists mdp  WHERE mdp.id_playlist=p.id_playlist) FROM playlists p WHERE p.id_user=:id_user and p.nom!='Favoris' and p.nom!='Historique' ORDER BY UPPER(p.nom)";
             $statement = $db->prepare($request);
             $statement->bindParam(':id_user', $id_user);   
             $statement->execute();
@@ -101,6 +101,7 @@
             return false;
         }
     }
+
     function dbGetid_favoris($db,$id_user){
         try {
             $request = "SELECT p.id_playlist,p.date_creation,(SELECT count(*) from musique_dans_playlists mdp JOIN playlists pp ON pp.id_playlist=mdp.id_playlist WHERE pp.nom='Favoris' AND pp.id_user= :id_user) FROM playlists p WHERE p.nom='Favoris' AND p.id_user= :id_user";
@@ -183,10 +184,30 @@
             $statement = $db->prepare($request);
             $statement->bindParam(':id_musique', $id_musique);    
             $statement->execute();
-            addHistorique($db,$id_musique, $id_user);
             $result = [$statement->fetch(PDO::FETCH_ASSOC)];
             array_unshift($result,isFavoris($db,$id_musique,$id_user));
             return $result;
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbGetAleaMusique($db){
+        try {
+            $statement = $db->query('SELECT id_musique FROM musiques ORDER BY random() LIMIT 1');
+            return $statement->fetch(PDO::FETCH_ASSOC)['id_musique'];
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+    function dbGetLastMusique($db,$id_user){
+        try {
+            $request = "SELECT m.id_musique FROM musiques m JOIN musique_dans_playlists mdp ON m.id_musique=mdp.id_musique JOIN playlists p ON p.id_playlist=mdp.id_playlist WHERE id_user = :id_user and p.nom='Historique' ORDER BY mdp.date_ajout DESC";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);    
+            $statement->execute();            
+            return $statement->fetchall(PDO::FETCH_ASSOC);
         } catch (PDOException $exception){
             error_log('Request error: '. $exception->getMessage());
             return false;
