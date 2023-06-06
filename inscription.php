@@ -11,46 +11,48 @@
         <script src="js/ajax.js" defer></script>
         <script src="js/inscription.js" defer></script>
     </head>
-    <body>
-        <div class="row" style="height:10%;"></div>
+    <body style="background-color:#CBDEFF">
+        <div class="row d-flex justify-content-center align-items-center" style="height:15%;">
+            <img src="ressources/logo.png" style="width:7em;height:5em">
+        </div>
         <div class="row">
             <div class="col"></div>
-            <div class="col">
+            <div class="col border border-dark rounded text-center" style="background-color:rgb(222,222,222);">
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
                     <div class="form-outline mb-4 row">
                         <div class="col">
-                            <h2 class="text-center">Inscription</h2>
+                            <h2 class="text-center" style="color:midnightblue;">Inscription</h2>
                         </div>
                     </div>
                     <div class="form-outline mb-4 row">
                         <div class="col">
-                            <label class="form-label">Nom</label>
+                            <label class="form-label" style="color:midnightblue;">Nom</label>
                             <input type="text" id="nom" class="form-control" />
                         </div>
                         <div class="col">
-                            <label class="form-label">Prénom</label>
+                            <label class="form-label" style="color:midnightblue;">Prénom</label>
                             <input type="text" id="prenom" class="form-control" />
                         </div>
                     </div>
                     <div class="form-outline mb-4 row">
                         <div class="col">
-                            <label class="form-label">Date de naissance</label>
-                            <input type="date" id="date_naissance" value="2000-01-01" min="1970-01-01" max="2010-12-31"  class="form-control" />
+                            <label class="form-label" style="color:midnightblue;">Date de naissance</label>
+                            <input type="date" id="date_naissance" min="1970-01-01" max="2010-12-31"  class="form-control" />
                         </div>
                     </div>
                     <div class="form-outline mb-4 row">
                         <div class="col">
-                            <label class="form-label">Adresse email</label>
+                            <label class="form-label" style="color:midnightblue;">Adresse email</label>
                             <input type="email" id="email" class="form-control" />
                         </div>
                     </div>
                     <div class="form-outline mb-4 row">
                         <div class="col">
-                            <label class="form-label">Mot de passe</label>
+                            <label class="form-label" style="color:midnightblue;">Mot de passe</label>
                             <input type="password" id="mdp1" class="form-control" />
                         </div>
                         <div class="col">
-                            <label class="form-label">Confirmation mot de passe</label>
+                            <label class="form-label" style="color:midnightblue;">Confirmation mot de passe</label>
                             <input type="password" id="mdp2" class="form-control" />
                         </div>
                     </div>
@@ -62,13 +64,13 @@
                         </div>
                     </div>
                     <div class="form-outline mb-4 row">
-                        <div class="col">
+                        <div class="col" style="color:midnightblue;">
                             Si vous avez déjà un compte : <a href="connexion.php">Se connecter</a>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="col h-25"></div>
+            <div class="col"></div>
         </div>
         <div class="row"></div>
     </body>
