@@ -45,6 +45,10 @@
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = ListenMusic($db,$_GET['id_musique'],$_GET['id_user']);
         }
+    }elseif($requesttype=="inserthistorique"){
+        if($_SERVER['REQUEST_METHOD']=="POST"){
+            $request = addHistorique($db,$_POST['id_musique'],$_POST['id_user']);
+        }
     }elseif($requesttype=="fav"){
         if($_SERVER['REQUEST_METHOD']=="GET"){
             if($_GET['what']=="insert"){
