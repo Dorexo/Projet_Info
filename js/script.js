@@ -9,7 +9,9 @@ var inrecherche;
 var indetail;
 var inmusic = false;
 
-var playlist_lecture = [];
+var lastl = -1;
+var inlecture = false;
+var playlist_lecture = lecture_liste = [];
 var last = 1;
 var id_music;
 
@@ -102,8 +104,7 @@ function CheckDetail(classD){
 }
 
 // Footer
-function getMusique(insert=true,inlecture=false){
-    console.log(playlist_lecture,last);
+function getMusique(insert=true){
     inmusic = true;
     if(!inlecture){
         playlist_lecture = [];
@@ -113,9 +114,6 @@ function getMusique(insert=true,inlecture=false){
         ajaxRequest('POST','../php/request.php/inserthistorique',getMusique,'id_musique='+id_music+'&id_user='+id_user);
     }
     ajaxRequest('GET','../php/request.php/music?id_musique='+id_music+'&id_user='+id_user,printMusique);
-}
-function getHistorique(){
-    inmusic = true;
 }
 function printMusique(data){
     inner = `
@@ -189,28 +187,44 @@ function getLast(){
 function setIdMusicAlea(data){
     if(data){
         id_music = data;
+        inlecture = false;
         getMusique();
     }
 }
 function setIdMusicLast(data){
     if(data){
+        inlecture = true;
         playlist_lecture.push(id_music);
         if(!data[last]){
             id_music = playlist_lecture[last-1];
         }else{
+            console.log(data,last);
             id_music = data[last]['id_musique'];
             last = last+1;
         }
-        getMusique(false,true);
+        getMusique(false);
     }
 }
 function suivant(lecture=false){
     if(playlist_lecture.length==0){
+        last = 1;
+        inlecture = false;
         getALea();
     }else{
         last = last-1
         id_music = playlist_lecture.pop();
-        getMusique(lecture,true);
+        console.log(lecture_liste);
+        if(lecture_liste.includes(id_music)){
+            lecture = true;
+            t = []
+            for(i=0;i<lecture_liste.length;i++){
+                if(lecture_liste[i]!=id_music){
+                    t.push(lecture_liste[i]);
+                }
+            }
+            lecture_liste = t;
+        }
+        getMusique(lecture);
     }
 }
 function precedant(){
@@ -221,19 +235,23 @@ function ListenPlaylist(data){
         playlist_lecture = [];
         for(i=1;i<data.length;i++){
             playlist_lecture.unshift(data[i][1]['id_musique']);
+            lecture_liste.unshift(data[i][1]['id_musique']);
         }
+        last = playlist_lecture.length;
+        inlecture = true;
         suivant(true);
     }
 }
 function ListenAlbum(data){
     data = data[1];
-    console.log(data);
     if(data.length>1){
         playlist_lecture = [];
-        last = 1;
         for(i=0;i<data.length;i++){
             playlist_lecture.unshift(data[i]['id_musique']);
+            lecture_liste.unshift(data[i][1]['id_musique']);
         }
+        last = playlist_lecture.length;
+        inlecture = true;
         suivant(true);
     }
 }
@@ -260,6 +278,7 @@ function printHistorique(data){
     for (i = 0; i < playlists.length; i++) {
         playlists[i].addEventListener("click", function(event){
             id_music = event.currentTarget.value;
+            inlecture = false;
             getMusique();
         });
     }
@@ -298,13 +317,9 @@ function printPlaylists(data){
     }
   
 }
-function accueil(id=-1){
+function accueil(){
     inaccueil = true;
     inlibrary = inrecherche = indetail = false;
-    if(id!=-1){
-        id_music = id
-        getMusique();
-    }
     page.innerHTML = `
     <br>
     <div class="row">
@@ -447,6 +462,7 @@ function printRecherche(data){
         for (i = 0; i < playlists.length; i++) {
             playlists[i].addEventListener("click", function(event){
                 id_music = event.currentTarget.value;
+                inlecture = false;
                 getMusique();
             });
         }  
@@ -515,7 +531,7 @@ function recherche(){
     </div>
     <div class="row" style="height:4%"></div>`;
 
-    document.getElementById("recherche").addEventListener("keydown", function(){
+    document.getElementById("recherche").addEventListener("input", function(){
         getRecherche();
     });
     rsubmit = document.getElementsByClassName("recherche_submit");
@@ -615,6 +631,7 @@ function printMusiquesLibrary(data){
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
             id_music = event.currentTarget.value;
+            inlecture = false;
             getMusique();
         });
     } 
@@ -874,6 +891,7 @@ function printdetailMusique(data){
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
             id_music = event.currentTarget.value;
+            inlecture = false;
             getMusique();
         });
     }
@@ -959,6 +977,7 @@ function printdetailAlbum(data){
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
             id_music = event.currentTarget.value;
+            inlecture = false;
             getMusique();
         });
     }

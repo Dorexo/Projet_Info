@@ -481,18 +481,21 @@
             return false;
         }
     }
+
     function dbModifProfil($db,$id_user,$nom,$prenom,$email,$date_naissance,$mdp){
         try {
-            $hash=password_hash($mdp, PASSWORD_DEFAULT);
-            $request = "UPDATE users SET nom=:nom, prenom=:prenom, email=:email, date_naissance=:date_naissance, mdp=:mdp WHERE id_user = :id_user";
-            $stmt = $db->prepare($request);
-            $stmt->bindParam(':nom', $nom);
-            $stmt->bindParam(':prenom', $prenom);
-            $stmt->bindParam(':date_naissance', $date_naissance);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':mdp', $hash);
-            $stmt->bindParam(':id_user', $id_user);
-            $stmt->execute();
+            if(!AlreadyUser($db,$email)){
+                $hash=password_hash($mdp, PASSWORD_DEFAULT);
+                $request = "UPDATE users SET nom=:nom, prenom=:prenom, email=:email, date_naissance=:date_naissance, mdp=:mdp WHERE id_user = :id_user";
+                $stmt = $db->prepare($request);
+                $stmt->bindParam(':nom', $nom);
+                $stmt->bindParam(':prenom', $prenom);
+                $stmt->bindParam(':date_naissance', $date_naissance);
+                $stmt->bindParam(':email', $email);
+                $stmt->bindParam(':mdp', $hash);
+                $stmt->bindParam(':id_user', $id_user);
+                $stmt->execute();
+            }
         } catch (PDOException $exception){
             error_log('Request error: '. $exception->getMessage());
             return false;
