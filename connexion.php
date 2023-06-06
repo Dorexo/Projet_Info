@@ -1,6 +1,7 @@
 <?php
     session_start();
     $_SESSION['id'] = $_SESSION['connected'] = NULL;
+    $ERREUR_mdp = false;
 
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
@@ -62,7 +63,9 @@
                                 if(isset($_POST["email"]) && isset($_POST["mdp"])){
                                     $user = dbGetUser($db,$_POST["email"],$_POST["mdp"]);
                                     if ($user=="error") {
-                                        $ERREUR_mdp = true;
+                                        echo "<div class='alert alert-danger' role='alert'>
+                                        Mot de passe ou email incorrect
+                                             </div>";
                                     }else {
                                         $_SESSION['id'] = $user[0];
                                         $_SESSION['connected'] = true;
