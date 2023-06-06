@@ -482,9 +482,27 @@
         }
     }
 
+    function AlreadyUserExept($db,$email,$id_user){
+        try{
+            $request = 'SELECT * FROM users where email=:email and id_user!=:id_user';
+            $statement = $db->prepare($request);
+            $statement->bindParam(':email', $email); 
+            $statement->bindParam(':id_user', $id_user);       
+            $statement->execute();
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            if(empty($user)){
+                return false;
+            }else{
+                return true;
+            }
+        }catch (PDOException $exception){
+            error_log('Request error: '.$exception->getMessage());
+            return false;
+        }
+    }
     function dbModifProfil($db,$id_user,$nom,$prenom,$email,$date_naissance,$mdp){
         try {
-            if(!AlreadyUser($db,$email)){
+            if(!AlreadyUserExept($db,$email,$id_user)){
                 $hash=password_hash($mdp, PASSWORD_DEFAULT);
                 $request = "UPDATE users SET nom=:nom, prenom=:prenom, email=:email, date_naissance=:date_naissance, mdp=:mdp WHERE id_user = :id_user";
                 $stmt = $db->prepare($request);

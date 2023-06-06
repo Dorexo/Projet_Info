@@ -12,7 +12,7 @@ function inscription(){
     mdp2 = document.getElementById('mdp2').value;
     document.getElementById('mdp2').value = "";
     if(nom!="" && prenom!="" && date_naissance!="" && email!="" && mdp1!=""){
-        if(email.includes('@') && email[email.length]!='@'){
+        if(email.includes('@') && email[email.length-1]!='@'){
             dn = new Date(date_naissance);
             da = new Date(Date.now());
             if(mdp1!=mdp2){
