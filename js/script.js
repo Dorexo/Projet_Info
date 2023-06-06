@@ -15,7 +15,8 @@ var playlist_lecture = lecture_liste = [];
 var last = 1;
 var id_music;
 
-// Check Favoris
+//========================================================= Check Favoris =========================================================//
+// Parcours tous les boutons fav pour savoir si on doit mettre la musique dans notre playlist favoris
 function checkFav(classe,callback){
     for (i = 0; i < classe.length; i++) {
         classe[i].addEventListener("click", function(event){
@@ -28,6 +29,7 @@ function checkFav(classe,callback){
         });
     }
 }
+// Appeler après avoir modifier les favoris et en fonction de l'endroit où l'on est, refresh la page
 function refresh(){
     if(inrecherche){
         getRecherche();
@@ -41,7 +43,7 @@ function refresh(){
         ajaxRequest('GET','../php/request.php/favfoot?id_musique='+icon.getAttribute("value")+'&id_user='+id_user,refreshfavfoot);
     }
 }
-
+// Refresh le footer pour les fav
 function refreshfavfoot(data){
     bouton = document.getElementById("foot");
     if(data[0]==true){
@@ -52,7 +54,8 @@ function refreshfavfoot(data){
     bouton.innerHTML = inner;
 }
 
-// Check+
+//========================================================== Check Plus ===========================================================//
+// Parcours tt les boutons pour ouvrir le modal avec la liste des playlists attitrée
 function checkPlus(classeadd){
     for (i = 0; i < classeadd.length; i++) {
         classeadd[i].addEventListener("click", function(event){
@@ -61,9 +64,11 @@ function checkPlus(classeadd){
         });
     }
 }
+// Récupère toutes les playlists qui ne contienent pas une musique
 function getPlaylistsAndMusique(){
     ajaxRequest('GET','../php/request.php/modal?id_musique='+id_musique_modal+'&id_user='+id_user,printModal);
 }
+// Affiche le modal avec les infos nécessaires
 function printModal(data){
     modalTitle = document.getElementById('modaltitle');
     modalTitle.innerHTML = '<span value="'+data[0]['id_musique']+'" id="id_musique_modal">Ajouter '+data[0]['titre']+' à :</span>';  
@@ -84,6 +89,7 @@ function printModal(data){
     }
     modalText.innerHTML = inner;
 }
+// Raffraichie une fois que la musique fut ajouter
 function refreshModal(data){
     getPlaylistsAndMusique();
     if(inlibrary){
@@ -93,7 +99,8 @@ function refreshModal(data){
     }
 }
 
-// CheckDetail
+//========================================================= Check Détails =========================================================//
+// Parcours tt les boutons pour envoyer vers la page des détails de la musique
 function CheckDetail(classD){
     for (i = 0; i < classD.length; i++) {
         classD[i].addEventListener("click", function(event){
@@ -103,7 +110,8 @@ function CheckDetail(classD){
     }
 }
 
-// Footer
+//============================================================= Footer ============================================================//
+// Récupère la musique avec sa source pour l'écouter et l'insert si on est pas en train d'écouter les musiques précédantes
 function getMusique(insert=true){
     inmusic = true;
     if(!inlecture){
@@ -115,6 +123,7 @@ function getMusique(insert=true){
     }
     ajaxRequest('GET','../php/request.php/music?id_musique='+id_music+'&id_user='+id_user,printMusique);
 }
+// Affiche la musique et toutes les infos en la jouant dans le footer 
 function printMusique(data){
     inner = `
         <div class="col d-flex align-items-center ms-3">
@@ -162,28 +171,36 @@ function printMusique(data){
                 </button>
             </div>
             </div>
-        </div> `;   
+        </div> `; 
     document.getElementById("music").innerHTML = inner;
     if(inaccueil){
+        // Actualise l'historique   
         getHistorique();
     }
+    // Vérifie si l'on appuie sur le bouton d'insertion dans une playlist
     buttons = document.getElementsByClassName('modalclass');
     checkPlus(buttons);
+    // Vérifie si l'on appuie sur le bouton de fav
     classe = document.getElementsByClassName("favfoot");
     checkFav(classe,refresh);
+    // Vérifie si l'on appuie sur le bouton des détails d'une musique
     classD = document.getElementsByClassName("detailf");
     CheckDetail(classD);
+    // Passe à la musique suivante à la fin de l'audio
     document.getElementById("audioplay").addEventListener("ended", function(){
         suivant();
     });
 }
 
+// Récupère une musique aléatoire
 function getALea(){
     ajaxRequest('GET','../php/request.php/musiqueAlea',setIdMusicAlea);
 }
+// Récupère les dernières musiques
 function getLast(){
     ajaxRequest('GET','../php/request.php/lastMusique?id_user='+id_user,setIdMusicLast);
 }
+// Met une musique aléatoire
 function setIdMusicAlea(data){
     if(data){
         id_music = data;
@@ -191,6 +208,7 @@ function setIdMusicAlea(data){
         getMusique();
     }
 }
+// Met la dernière musique
 function setIdMusicLast(data){
     if(data){
         inlecture = true;
@@ -205,6 +223,7 @@ function setIdMusicLast(data){
         getMusique(false);
     }
 }
+// Met la prochaine musique qu'elle soit aléatoire ou dans une playlist/album
 function suivant(lecture=false){
     if(playlist_lecture.length==0){
         last = 1;
@@ -227,9 +246,11 @@ function suivant(lecture=false){
         getMusique(lecture);
     }
 }
+// Récupère la musique précédante
 function precedant(){
     getLast();
 }
+// Ecoute une playlist
 function ListenPlaylist(data){
     if(data.length>1){
         playlist_lecture = [];
@@ -242,6 +263,7 @@ function ListenPlaylist(data){
         suivant(true);
     }
 }
+// Ecoute un album
 function ListenAlbum(data){
     data = data[1];
     console.log(data);
@@ -257,10 +279,12 @@ function ListenAlbum(data){
     }
 }
 
-// Accueil
+//============================================================ Accueil ============================================================//
+// Récupère l'historique
 function getHistorique(){
     ajaxRequest('GET','../php/request.php/accueil/historique?id_user='+id_user,printHistorique);
 }
+// Affiche l'historique
 function printHistorique(data){
     nbhisto = data.length
     liste = document.getElementById("historique_accueil");
@@ -284,9 +308,11 @@ function printHistorique(data){
         });
     }
 }
+// Récupère les playlsits
 function getPlaylists(){
     ajaxRequest('GET','../php/request.php/accueil/playlists?id_user='+id_user,printPlaylists);
 }
+// Affiche les playlsits dont celle des favoris
 function printPlaylists(data){
     nbplaylist = data.length
     
@@ -307,8 +333,7 @@ function printPlaylists(data){
         inner = inner + '<div class="col mt-3"></div></div>'
     }
     liste.innerHTML= inner;
-
-
+    // Vérifie si l'on veut des info sur les playlists
     playlists = document.getElementsByClassName("play")
     for (i = 0; i < playlists.length; i++) {
         playlists[i].addEventListener("click", function(event){
@@ -318,6 +343,7 @@ function printPlaylists(data){
     }
   
 }
+// Affiche la page d'accueil
 function accueil(){
     inaccueil = true;
     inlibrary = inrecherche = indetail = false;
@@ -381,6 +407,7 @@ function accueil(){
     <div class="row" style="height:4%"></div>`;
     getPlaylists();
     getHistorique();
+    // Vérifie si l'on appuyer sur la barre de recherche
     document.getElementById("recherche_submit").addEventListener("click", function(event){
         event.preventDefault();
         search = document.getElementById('recherche').value;
@@ -396,7 +423,8 @@ function accueil(){
 }
 
 
-// Recherche
+//=========================================================== Recherche ===========================================================//
+// Récupère les infos des recherches en fonction des filtres
 function getRecherche(){
     search = document.getElementById('recherche').value;
     radios = document.getElementsByName("parqui");
@@ -407,6 +435,7 @@ function getRecherche(){
         }
     }
 }
+// Affiche les résultats des recherches
 function printRecherche(data){
     nbresult = data.length
     liste = document.getElementById("recherche_page");
@@ -485,6 +514,7 @@ function printRecherche(data){
         }
     }
 }
+// Affiche la page Recherche
 function recherche(){
     inrecherche= true;
     inlibrary = inaccueil = indetail = false;
@@ -531,7 +561,7 @@ function recherche(){
         <div class="col"></div>
     </div>
     <div class="row" style="height:4%"></div>`;
-
+    // Vérifie si l'on appuie sur les boutons de recherche
     document.getElementById("recherche").addEventListener("input", function(){
         getRecherche();
     });
@@ -543,11 +573,12 @@ function recherche(){
     }
 }
 
-
-// Playlists
+//=========================================================== Playlists ===========================================================//
+// Récupères toutes les playlists d'un user
 function getPlaylistsLibrary(){
     ajaxRequest('GET','../php/request.php/accueil/playlists?id_user='+id_user,printPlaylistsLibrary);
 }
+// Affiche toutes les playlists dont celle des favoris
 function printPlaylistsLibrary(data){
     nbplaylistl = data.length;
     liste = document.getElementById("liste_playlists");
@@ -562,7 +593,7 @@ function printPlaylistsLibrary(data){
         </td></tr>`
     }
     liste.innerHTML = inner + '</tbody></table>';
-    
+    // Vérifie si l'on veut les musique d'une playlist
     playlists = document.getElementsByClassName("play")
     for (i = 0; i < playlists.length; i++) {
         playlists[i].addEventListener("click", function(event){
@@ -570,6 +601,7 @@ function printPlaylistsLibrary(data){
             getMusiqueLibrary();
         });
     }
+    // Vérifie si l'on veut supprimer une playlist
     playlistssup = document.getElementsByClassName("playsup")
     for (i = 0; i < playlistssup.length; i++) {
         playlistssup[i].addEventListener("click", function(event){
@@ -578,9 +610,11 @@ function printPlaylistsLibrary(data){
         });
     }
 }
+// Récupère les musique d'une playlist
 function getMusiqueLibrary(){
     ajaxRequest('GET','../php/request.php/favoris?id_user='+id_user+'&id_playlist='+id_playlist_library,printMusiquesLibrary);
 }
+// Affiche les musiques d'une playlist
 function printMusiquesLibrary(data){
     titre = document.getElementById("titre_playlist");
     titre.innerHTML = "<div class='row'><div class='col'></div><div class='col-8'><h2 style='color: midnightblue'>Liste des musiques de " + data[0]['nom'] +"</h2></div><div class='col d-flex align-items-center'><button type='button' class='btn btn-success' id='playplaylist' value='" + data[0]['id_playlist'] +"'><i class='fa-solid fa-play'></i></button></div>";
@@ -635,7 +669,8 @@ function printMusiquesLibrary(data){
             inlecture = false;
             getMusique();
         });
-    } 
+    }
+    // Vérifie si l'on veut enlevé une musique d'une playlist 
     buttonssupp = document.getElementsByClassName('supclass');
     for (i = 0; i < buttonssupp.length; i++) {
         buttonssupp[i].addEventListener("click", function(event){
@@ -643,12 +678,13 @@ function printMusiquesLibrary(data){
             ajaxRequest('DELETE','../php/request.php/modal?id_musique='+id_musique_supp+'&id_playlist='+id_playlist_library,refreshModal);
         });
     }
+    // Vérifie si l'on veut jouer une playlist
     document.getElementById("playplaylist").addEventListener("click", function(event){
         id_playlist = event.currentTarget.getAttribute('value');
         ajaxRequest('GET','../php/request.php/favoris?id_user='+id_user+'&id_playlist='+id_playlist,ListenPlaylist);
     });
 }
-
+// Affiche la page des playlists
 function library(id=-1){
     inlibrary = true;
     inrecherche = inaccueil = indetail = false;
@@ -711,10 +747,12 @@ function library(id=-1){
     });
 }
 
-// Profil
+//============================================================ Profil =============================================================//
+// Récupère les infos du profil
 function getProfil(){
     ajaxRequest('GET','../php/request.php/profil?id_user='+id_user,printProfil);
 }
+// Affiche les infos du profil
 function printProfil(data){
     date_naissance = new Date(data['date_naissance']);
     dateage = new Date(Date.now() - date_naissance.getTime());
@@ -778,6 +816,7 @@ function printProfil(data){
         </div>
     </form>
     `;
+    // Modifie les infos
     boutonmodif = document.getElementById("modifier");
     boutonmodif.addEventListener("click", function(event){
         event.preventDefault();
@@ -802,7 +841,7 @@ function printProfil(data){
         }
     });
 }
-
+// Affiche la page du profil
 function profil(){
     inrecherche = inaccueil = inlibrary = indetail = false;
     page.innerHTML = `
@@ -829,10 +868,12 @@ function profil(){
         <div class="col"></div>
     </div>
     <div class="row" style="height:4%"></div>`;
+    // Vérifie si l'on veut se déconnecter
     boutondeconect = document.getElementById("deconnect");
     boutondeconect.addEventListener("click", function(){
         document.location.href="../connexion.php"; 
     });
+    // Vérifie si l'on veut nettoyer l'historique
     boutonnettoyer = document.getElementById("nettoyer");
     boutonnettoyer.addEventListener("click", function(){
         ajaxRequest('DELETE','../php/request.php/nettoyer?id_user='+id_user,accueil);
@@ -840,10 +881,12 @@ function profil(){
     getProfil();
 }
 
-// Detail
+//===================================================== Detail des Musiques =======================================================//
+// Récupère les détails des musiques
 function getDetailMusique(){
     ajaxRequest('GET','../php/request.php/detailM?id_musique='+id_musique_detail+'&id_user='+id_user,printdetailMusique);
 }
+// Affiche les détails des musiques
 function printdetailMusique(data){
     indetail = true;
     inrecherche = inaccueil = inlibrary = false;
@@ -900,6 +943,7 @@ function printdetailMusique(data){
     checkPlus(buttons);
     classe = document.getElementsByClassName("favd");
     checkFav(classe,refresh);
+    // Vérifie si l'on veut écouter une musique
     musiques = document.getElementsByClassName("musique")
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
@@ -908,6 +952,7 @@ function printdetailMusique(data){
             getMusique();
         });
     }
+    // Vérifie si l'on veut les détails d'un album
     albums = document.getElementsByClassName("album")
     for (i = 0; i < albums.length; i++) {
         albums[i].addEventListener("click", function(event){
@@ -915,6 +960,7 @@ function printdetailMusique(data){
             getDetailAlbum(id);
         });
     }
+    // Vérifie si l'on veut les détails d'un artiste
     artistes = document.getElementsByClassName("artiste")
     for (i = 0; i < artistes.length; i++) {
         artistes[i].addEventListener("click", function(event){
@@ -924,10 +970,12 @@ function printdetailMusique(data){
     }
 }
 
-// Detail Album
+//====================================================== Detail des Albums ========================================================//
+// Récupère les détails d'un album
 function getDetailAlbum(id_album_detail){
     ajaxRequest('GET','../php/request.php/detailAl?id_album='+id_album_detail,printdetailAlbum);
 }
+// Affiche les détails de l'album
 function printdetailAlbum(data){
     inrecherche = inaccueil = inlibrary = indetail = false;
     inner = `
@@ -986,6 +1034,7 @@ function printdetailAlbum(data){
         classD = document.getElementsByClassName("detaild");
         CheckDetail(classD);
     }
+    // Vérifie si l'on veut écouter une musique
     musiques = document.getElementsByClassName("musique")
     for (i = 0; i < musiques.length; i++) {
         musiques[i].addEventListener("click", function(event){
@@ -994,6 +1043,7 @@ function printdetailAlbum(data){
             getMusique();
         });
     }
+    // Vérifie si l'on veut les détails d'un artiste
     artistes = document.getElementsByClassName("artiste")
     for (i = 0; i < artistes.length; i++) {
         artistes[i].addEventListener("click", function(event){
@@ -1001,16 +1051,19 @@ function printdetailAlbum(data){
             getDetailArtiste(id);
         });
     }
+    // Vérifie si l'on veut écouter un album
     document.getElementById("playalbum").addEventListener("click", function(event){
         id_album = event.currentTarget.getAttribute('value');
         ajaxRequest('GET','../php/request.php/detailAl?id_album='+id_album,ListenAlbum);
     });
 }
 
-// Detail Album
+//===================================================== Detail des Artistes =======================================================//
+// Récupère les détails d'un artistes
 function getDetailArtiste(id_artiste_detail){
     ajaxRequest('GET','../php/request.php/detailAr?id_artiste='+id_artiste_detail,printdetailArtiste);
 }
+// Affiche les détails d'un artiste
 function printdetailArtiste(data){
     inrecherche = inaccueil = inlibrary = indetail = false;
     inner = `
@@ -1056,6 +1109,7 @@ function printdetailArtiste(data){
         classD = document.getElementsByClassName("detaild");
         CheckDetail(classD);
     }
+    // Vérifie si l'on veut les détails d'un album
     albums = document.getElementsByClassName("album")
     for (i = 0; i < albums.length; i++) {
         albums[i].addEventListener("click", function(event){
@@ -1065,10 +1119,12 @@ function printdetailArtiste(data){
     }
 }
 
+// Vérifie si l'on veut ajouter une musique à une playlist
 document.getElementById("addMusic").addEventListener("click", function(){
     id_musique = document.getElementById("id_musique_modal").getAttribute('value');
     id_playlist = document.getElementById("id_playlist_modal").value;
     ajaxRequest('POST','../php/request.php/modal',refreshModal,'id_musique='+id_musique+'&id_playlist='+id_playlist);
 });
 
+// Appel accueil, le lieu d'arrivée
 accueil();
