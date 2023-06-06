@@ -102,6 +102,10 @@
         if($_SERVER['REQUEST_METHOD']=="GET"){
             $request = dbGetLastMusique($db,$_GET['id_user']);
         }
+    }elseif($requesttype=="nettoyer"){
+        if($_SERVER['REQUEST_METHOD']=="DELETE"){
+            $request = dbDeleteAllHistorique($db,$_GET['id_user']);
+        }
     }
 
     echo json_encode($request);

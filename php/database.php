@@ -582,4 +582,19 @@
             return false;
         }
     }
+
+    // DeleteHistorique
+
+    function dbDeleteAllHistorique($db,$id_user){
+        try {
+            $request = "DELETE FROM musique_dans_playlists m WHERE m.id_playlist=(SELECT id_playlist FROM playlists p WHERE p.nom='Historique' AND p.id_user=:id_user)";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
 ?>

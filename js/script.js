@@ -244,11 +244,12 @@ function ListenPlaylist(data){
 }
 function ListenAlbum(data){
     data = data[1];
+    console.log(data);
     if(data.length>1){
         playlist_lecture = [];
         for(i=0;i<data.length;i++){
             playlist_lecture.unshift(data[i]['id_musique']);
-            lecture_liste.unshift(data[i][1]['id_musique']);
+            lecture_liste.unshift(data[i]['id_musique']);
         }
         last = playlist_lecture.length;
         inlecture = true;
@@ -812,7 +813,13 @@ function profil(){
         <div class="col-4" id="info_profil"></div>
         <div class="col-2"></div>
         <div class="col-4 text-center">
-            <div class="row" style="height:45%;"></div>
+            <div class="row" style="height:35%;"></div>
+            <div class="row">
+                <div class="col text-center">
+                    <button type="button" class="btn btn-success" id="nettoyer" style="width:50%;">Nettoyer l'historique</button>
+                </div>
+            </div>
+            <div class="row" style="height:5%;"></div>
             <div class="row">
                 <div class="col text-center">
                     <button type="button" class="btn btn-primary" id="deconnect" style="width:50%;">DECONNEXION</button>
@@ -825,6 +832,10 @@ function profil(){
     boutondeconect = document.getElementById("deconnect");
     boutondeconect.addEventListener("click", function(){
         document.location.href="../connexion.php"; 
+    });
+    boutonnettoyer = document.getElementById("nettoyer");
+    boutonnettoyer.addEventListener("click", function(){
+        ajaxRequest('DELETE','../php/request.php/nettoyer?id_user='+id_user,accueil);
     });
     getProfil();
 }
