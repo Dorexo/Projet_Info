@@ -1,3 +1,4 @@
+// Vérifie les bonnes infos et inscri le nouvel utilisateur
 function inscription(){
     nom = document.getElementById('nom').value;
     document.getElementById('nom').value = "";
@@ -30,6 +31,7 @@ function inscription(){
         }
     }
 }
+// Affiche un message d'erreur ou redirige vers connexion
 function confirmation(data){
     if(data=="Already"){
         document.getElementById("errors").style.display = "block";
@@ -40,6 +42,7 @@ function confirmation(data){
     }
 }
 
+// Vérifie si l'on a appuyer sur le bouton se connecter
 function listener(){
     document.getElementById("envoyer").addEventListener("click", function(event){
         event.preventDefault();
@@ -48,4 +51,3 @@ function listener(){
 }
 
 listener();
-

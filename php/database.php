@@ -1,4 +1,5 @@
 <?php
+    // Connexion à la base de donnée
     class database {
         static $db = null;
         static function connexionBD() {
@@ -18,7 +19,7 @@
     }
 
     //CONNEXION/INSCRIPTIONS
-
+    // Récupère tt les utilisateur avec un email pour voir si le mdp correspond
     function dbGetUser($db,$email,$mdp){
         try{
             $request = 'SELECT * FROM users where email=:email';
@@ -37,6 +38,7 @@
         }
     } 
 
+    // Insert un nouvel utilisateur en vérifiant s'il n'en existe pas déjà un
     function AlreadyUser($db,$email){
         try{
             $request = 'SELECT * FROM users where email=:email';
@@ -87,8 +89,9 @@
         }
     } 
 
-    // ACCEUIL
-    
+
+    // INDEX.PHP
+    // Récupères toutes les playlists
     function dbGetPlaylists($db,$id_user){
         try{
             $request = "SELECT p.id_playlist, p.nom, p.date_creation, (SELECT count(*) from musique_dans_playlists mdp  WHERE mdp.id_playlist=p.id_playlist) FROM playlists p WHERE p.id_user=:id_user and p.nom!='Favoris' and p.nom!='Historique' ORDER BY UPPER(p.nom)";
@@ -102,6 +105,7 @@
         }
     }
 
+    // Récupère l'id de la playlist favoris
     function dbGetid_favoris($db,$id_user){
         try {
             $request = "SELECT p.id_playlist,p.date_creation,(SELECT count(*) from musique_dans_playlists mdp JOIN playlists pp ON pp.id_playlist=mdp.id_playlist WHERE pp.nom='Favoris' AND pp.id_user= :id_user) FROM playlists p WHERE p.nom='Favoris' AND p.id_user= :id_user";
@@ -115,7 +119,7 @@
         }
     }
 
-
+    // Ajoute une musique dans l'historique et si il y a plus de 10 musiques, en supprime une
     function deleteHistorique($db,$id_user){
         try {
             $request = "SELECT m.id_musique,m.date_ajout
@@ -178,6 +182,8 @@
             return false;
         }
     }
+
+    // Renvoie les infos pour écouter une musique
     function ListenMusic($db, $id_musique, $id_user) {
         try {
             $request = 'SELECT m.id_musique, m.titre, m.duree, m.src, a.image, a.nom as "anom", r.nom as "rnom" FROM musiques m JOIN albums a ON m.id_album=a.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE id_musique = :id_musique';
@@ -192,6 +198,8 @@
             return false;
         }
     }
+
+    // Récupère une musique aléatoire
     function dbGetAleaMusique($db){
         try {
             $statement = $db->query('SELECT id_musique FROM musiques ORDER BY random() LIMIT 1');
@@ -201,6 +209,7 @@
             return false;
         }
     }
+    // Récupère les dernières musiques
     function dbGetLastMusique($db,$id_user){
         try {
             $request = "SELECT m.id_musique FROM musiques m JOIN musique_dans_playlists mdp ON m.id_musique=mdp.id_musique JOIN playlists p ON p.id_playlist=mdp.id_playlist WHERE id_user = :id_user and p.nom='Historique' ORDER BY mdp.date_ajout DESC";
@@ -214,6 +223,7 @@
         }
     }
 
+    // Récupère l'historique
     function dbGetHistorique($db, $user_id) {
         try {
             $request = 'SELECT m.id_musique, m.titre, alb.image, alb.nom as "anom", art.nom as "rnom" FROM musiques m
@@ -234,7 +244,7 @@
     }
 
 
-    //Recherche
+    // Recherche par musiques
     function dbSearchMusiques($db, $search, $id_user) {
         try {
             $request = 'SELECT m.id_musique, a.image, titre, a.nom as "anom", r.nom as "rnom", duree, a.date_parution '."FROM musiques m JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste WHERE titre ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(titre)";
@@ -253,6 +263,7 @@
             return false;
         }
     }
+    // Recherche par albums
     function dbSearchAlbums($db, $search) {
         try {
             $request = 'SELECT a.id_album,a.nom as "anom", r.nom as "rnom", a.image, a.date_parution '."FROM albums a JOIN artistes r ON a.id_artiste=r.id_artiste WHERE a.nom ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(a.nom)";
@@ -266,6 +277,7 @@
             return false;
         }
     }
+    // Recherche par artistes
     function dbSearchArtistes($db, $search) {
         try {
             $request = "SELECT id_artiste, nom, image FROM artistes WHERE nom ILIKE CONCAT('%',:search::text, '%') ORDER BY UPPER(nom)";
@@ -280,6 +292,7 @@
         }
     }
 
+    // Vérifie si une musique est dans les favoris
     function isFavoris($db, $id_musique, $id_user) {
         try {
             $request = "SELECT COUNT(*) AS favs FROM musiques m
@@ -299,7 +312,7 @@
         }
     }
     
-
+    // Insert/Delete une musique dans la playlsit favoris
     function dbInsertFav($db,$id_musique,$id_user){
         try {
             $stmt = $db->prepare("SELECT id_playlist from playlists WHERE id_user=:id_user AND nom='Favoris'");
@@ -337,6 +350,7 @@
         }
     }
 
+    // Récupère les musiques d'un playlist et ses infos
     function dbGetMusiqueOfPlaylist($db,$id_playlist,$id_user){
         try {
             $request = 'SELECT m.id_musique, a.image, titre, a.nom as "anom", r.nom as "rnom", duree, mdp.date_ajout FROM musique_dans_playlists mdp JOIN musiques m ON m.id_musique=mdp.id_musique JOIN albums a ON a.id_album=m.id_album JOIN artistes r ON a.id_artiste=r.id_artiste  WHERE mdp.id_playlist = :id_playlist';
@@ -368,7 +382,7 @@
         }
     }
 
-    // Modal
+    // Récupère les infos pour le modal pour inséré des musiques dans une playlist
     function dbGetPlaylistsWhitoutMusique($db,$id_musique,$id_user){
         try {
             $request = "SELECT nom,id_playlist FROM playlists WHERE id_playlist NOT IN (SELECT id_playlist FROM musique_dans_playlists WHERE id_musique = :id_musique) AND nom!='Historique' AND nom!='Favoris' AND id_user=:id_user ORDER BY UPPER(nom)";
@@ -394,6 +408,8 @@
             return false;
         }
     }
+    
+    // Insert/Delete une musique dans une playlist
     function dbInsertMusique($db,$id_musique,$id_playlist){
         try {
             $date_ajout = date("d-m-Y H:i:s",time());
@@ -419,7 +435,7 @@
         }
     }
 
-
+    // Insert/Delete une playlist en vérifiant si cette dernière n'existe pas (pour l'insertion)
     function AlreadyPlaylist($db,$nom,$id_user){
         try {
             $request = "SELECT nom FROM playlists WHERE id_user = :id_user";
@@ -468,7 +484,7 @@
     }
 
 
-    // Profil
+    // Récupère les infos du profil
     function dbGetInfoProfil($db,$id_user){
         try {
             $request = "SELECT nom,prenom,date_naissance,email FROM users WHERE id_user = :id_user";
@@ -482,6 +498,7 @@
         }
     }
 
+    // Modification du profil
     function AlreadyUserExept($db,$email,$id_user){
         try{
             $request = 'SELECT * FROM users where email=:email and id_user!=:id_user';
@@ -520,7 +537,7 @@
         }
     }
 
-    // Detail
+    // Details d'une musique
     function dbGetDetailMusique($db,$id_musique){
         try {
             $request = 'SELECT m.id_musique,m.titre,m.duree, al.id_album, al.nom as "anom", al.image as "aimage", style_album, ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM musiques m JOIN albums al ON al.id_album=m.id_album JOIN artistes ar ON al.id_artiste=ar.id_artiste JOIN styles s ON s.id_style=al.id_style JOIN types t ON t.id_type=ar.id_type WHERE m.id_musique = :id_musique';
@@ -534,6 +551,7 @@
         }
     }
 
+    // Détails d'un album abec ses musiques
     function dbGetMusiqueOfAlbum($db,$id_album){
         try {
             $request = 'SELECT id_musique,al.image,titre FROM musiques m JOIN albums al ON al.id_album=m.id_album WHERE m.id_album = :id_album';
@@ -558,6 +576,8 @@
             return false;
         }
     }
+
+    // Détails d'un artiste avec ses albums
     function dbGetAlbumOfArtiste($db,$id_artiste){
         try {
             $request = 'SELECT id_album,image,nom FROM albums WHERE id_artiste = :id_artiste';
@@ -575,6 +595,20 @@
             $request = 'SELECT ar.id_artiste, type_artiste, ar.nom as "rnom", ar.image as "rimage" FROM  artistes ar JOIN types t ON t.id_type=ar.id_type WHERE ar.id_artiste = :id_artiste';
             $statement = $db->prepare($request);
             $statement->bindParam(':id_artiste', $id_artiste);    
+            $statement->execute();
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception){
+            error_log('Request error: '. $exception->getMessage());
+            return false;
+        }
+    }
+
+    // Delete l'historique
+    function dbDeleteAllHistorique($db,$id_user){
+        try {
+            $request = "DELETE FROM musique_dans_playlists m WHERE m.id_playlist=(SELECT id_playlist FROM playlists p WHERE p.nom='Historique' AND p.id_user=:id_user)";
+            $statement = $db->prepare($request);
+            $statement->bindParam(':id_user', $id_user);    
             $statement->execute();
             return $statement->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $exception){
